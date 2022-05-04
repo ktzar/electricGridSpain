@@ -1,0 +1,5 @@
+CREATE TABLE instant (time text unique primary key, solarpv real, wind real, solarthermal real, nuclear real, hidro real, inter real, thermal real, cogen real, gas real, carbon real);
+CREATE TABLE monthly(month text unique primary key, solarpv real, wind real, solarthermal real, nuclear real, hidro real, inter real, thermal real, cogen real, gas real, carbon real);
+CREATE TABLE weekly(week text unique primary key, solarpv real, wind real, solarthermal real, nuclear real, hidro real, inter real, thermal real, cogen real, gas real, carbon real);
+CREATE TABLE yearly(year text unique primary key, solarpv real, wind real, solarthermal real, nuclear real, hidro real, inter real, thermal real, cogen real, gas real, carbon real);
+CREATE TABLE daily(day text unique primary key, solarpv real, wind real, solarthermal real, nuclear real, hidro real, inter real, thermal real, cogen real, gas real, carbon real);
