@@ -1,35 +1,10 @@
-//import Highcharts from 'highcharts'
-//import HighchartsReact from 'highcharts-react-official'
-
-/*
-const options = {
-      title: {
-              text: 'My chart'
-            },
-      series: [{
-              data: [1, 2, 3]
-            }]
-}
-*/
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts'
+import { Legend, Tooltip, PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts'
 import { useQuery } from 'react-query'
-
-const colours = {
-    solarpv: 'orange',
-    wind: 'blue',
-    solarthermal: 'red',
-    nuclear: 'purple',
-    hidro: 'lightblue',
-    thermal: 'grey',
-    cogen: 'yellow',
-    gas: 'teal',
-    carbon: 'brown'
-}
-
+import { colours } from '../shared/colours'
 
 export default () => {
-    const { isLoading, error, data: latestData } = useQuery('latestData', () => {
-        return fetch('/api/latest')
+    const { isLoading, error, data: latestData } = useQuery('instantData', () => {
+        return fetch('/api/instant')
             .then(res => res.json())
     })
     console.log({ isLoading, error, latestData })
@@ -65,16 +40,13 @@ export default () => {
                 <div className="card">
                   <div className="card-header"> 33.1 GW demand </div>
                   <div className="card-body">
-        {/*<HighchartsReact
-                        highcharts={Highcharts}
-                        options={options}
-                    />*/}
                         <PieChart width={200} height={250}>
                             <Pie data={seriesData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} fill="#82ca9d" label >
                                 {seriesData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={colours[entry.name]} />
                                              ))}
                             </Pie>
+                            <Legend />
 
                         </PieChart>
                   </div>

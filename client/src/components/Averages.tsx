@@ -1,4 +1,6 @@
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
+import { useQuery } from 'react-query'
+import { colours } from '../shared/colours'
 
 const data01 = [
       { name: 'Group A', value: 200 },
@@ -32,6 +34,33 @@ const options = {
 }
 
 export default () => {
+    const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
+        fetch('/api/daily').then(res => res.json())
+    )
+    const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
+        fetch('/api/monthly').then(res => res.json())
+    )
+    const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', () =>
+        fetch('/api/yearly').then(res => res.json())
+    )
+
+    if (isLoadingYearly || isLoadingMonthly || isLoadingDaily) {
+        return <div class="spinner-border" role="status">
+           <span class="sr-only">Loading...</span>
+       </div>
+    }
+
+    const yesterday = dailyData[1]
+    const lastDayData = Object.keys(yesterday)
+        .filter(k => yesterday[k] > 0 && k !== 'day')
+        .map(k => ({ name: k, value: yesterday[k]}))
+
+    const lastMonth = monthlyData[1]
+    const lastMonthData = Object.keys(lastMonth)
+        .filter(k => lastMonth[k] > 0 && k !== 'month')
+        .map(k => ({ name: k, value: lastMonth[k]}))
+
+
     return (
         <>
         <div className="card mt-2">
@@ -41,27 +70,23 @@ export default () => {
           <div className="card-body">
             <div className="row">
                 <div className="col">
+                    <h4>Yesterday</h4>
                     <PieChart width={200} height={250}>
-                        <Pie data={data01} dataKey="value" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" />
-                        <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#82ca9d" label />
+                        <Pie data={lastDayData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} fill="#82ca9d" label >
+                            {lastDayData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={colours[entry.name]} />
+                                         ))}
+                        </Pie>
                     </PieChart>
                 </div>
                 <div className="col">
+                    <h4>Last Month</h4>
                     <PieChart width={200} height={250}>
-                        <Pie data={data01} dataKey="value" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" />
-                        <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#82ca9d" label />
-                    </PieChart>
-                </div>
-                <div className="col">
-                    <PieChart width={200} height={250}>
-                        <Pie data={data01} dataKey="value" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" />
-                        <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#82ca9d" label />
-                    </PieChart>
-                </div>
-                <div className="col">
-                    <PieChart width={200} height={250}>
-                        <Pie data={data01} dataKey="value" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" />
-                        <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#82ca9d" label />
+                        <Pie data={lastMonthData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} fill="#82ca9d" label >
+                            {lastMonthData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={colours[entry.name]} />
+                                         ))}
+                        </Pie>
                     </PieChart>
                 </div>
             </div>

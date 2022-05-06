@@ -11,12 +11,8 @@ const queryClient = new QueryClient()
 const App = () => {
     return (<>
       <QueryClientProvider client={queryClient}>
-        <nav className="navbar navbar-light bg-light">
-          <div className="container-fluid">
-            <span className="navbar-brand mb-0 h1">Spanish grid dashboard</span>
-          </div>
-        </nav>
         <div className="container">
+            <h1>Spanish grid dashboard</h1>
             <h2>Today</h2>
             <Today/>
             <Averages/>

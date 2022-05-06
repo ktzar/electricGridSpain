@@ -89,8 +89,8 @@ async function ingestDaily(db) {
 }
 
 async function ingestMonthly(db) {
-    const startDate = format(subDays(new Date(), 30*7), 'yyyy-MM-dd')
-    const endDate = format(new Date(), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-dd')
+    const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
     console.log({reqUrl})
 
@@ -106,7 +106,7 @@ async function ingestMonthly(db) {
 }
 
 async function ingestYearly(db) {
-    const startDate = format(subDays(new Date(), 365*5), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 365*3), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
     console.log({reqUrl})
@@ -142,7 +142,7 @@ open({
             console.log('Yearly ingested')
         }
     } catch(e) {
-        console.log(e.response.data)
+        console.log(e.response || e)
     }
     
 })

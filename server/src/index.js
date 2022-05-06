@@ -6,14 +6,20 @@ const app = express()
 let db
 
 const statements = {
-    instantLatest: 'select * from instant order by time desc limit 0,1',
+    instantLast: 'select * from instant order by time desc limit 0,1',
+    instantLatest: 'select * from instant order by time desc limit 0,144',
     dailyLatest: 'select * from daily order by day desc limit 0,30',
     monthlyLatest: 'select * from monthly order by month desc limit 0,30',
     yearlyLatest: 'select * from yearly order by year desc limit 0,30'
 }
 
+app.get('/instant', async (req, res) => {
+    const row = await db.get(statements.instantLast)
+    res.send(row)
+})
+
 app.get('/latest', async (req, res) => {
-    const row = await db.get(statements.instantLatest)
+    const row = await db.all(statements.instantLatest)
     res.send(row)
 })
 
