@@ -17,7 +17,11 @@ export default () => {
         fetch('/api/monthly').then(res => res.json())
     )
 
-    if (isLoading || isLoadingMonthly || isLoadingDaily) {
+    const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', () =>
+        fetch('/api/yearly').then(res => res.json())
+    )
+
+    if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
         return <div class="spinner-border" role="status">
            <span class="sr-only">Loading...</span>
        </div>
@@ -44,12 +48,16 @@ export default () => {
                         series={dailyData.reverse()} />
                 </div>
                 <div className="col">
-                    <h5>Last year</h5>
+                    <h5>Last months</h5>
                     <EnergyLineChart
                         xAxis="month"
                         series={monthlyData.reverse()} />
                 </div>
                 <div className="col">
+                    <h5>Last years</h5>
+                    <EnergyLineChart
+                        xAxis="year"
+                        series={yearlyData.reverse()} />
                 </div>
             </div>
           </div>
