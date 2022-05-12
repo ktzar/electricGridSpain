@@ -1,11 +1,11 @@
 const sqlite3 = require('sqlite3')
 const args = require('args-parser')(process.argv)
-const { parseISO, format, subDays } = require('date-fns')
+const { parseISO, format, subDays, addDays } = require('date-fns')
 const {open} = require('sqlite')
 const parseJsonp = require('parse-jsonp')
 let axios = require('axios')
 
-function valuesToDates(res, dateFormat) {
+function valuesToDates(res, dateFormat, extraDays = 0) {
     const values = {}
     for (let v of res.data.included) {
         const readingType = readingMappings[v.type]
@@ -14,7 +14,7 @@ function valuesToDates(res, dateFormat) {
             continue;
         }
         for (let reading of v.attributes.values) {
-            const readingDate = format(parseISO(reading.datetime), dateFormat)
+            const readingDate = format(addDays(parseISO(reading.datetime), extraDays), dateFormat)
             console.log({readingDate})
             if (!values[readingDate]) {
                 values[readingDate] = {}
@@ -50,10 +50,14 @@ async function ingestInstant(db) {
     const res = await axios.get(reqUrl)
     const data = parseJsonp('callback', res.data)
 
+    let updatedRowsCount = 0
     for (let v of data.valoresHorariosGeneracion) {
         const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.inter, v.termRenov, v.cogenResto, v.cc, v.car])
-        console.log(res.lastID)
+        if (res.lastId>0) {
+            updatedRowsCount++
+        }
     }
+    console.log(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
 }
 
 const readingMappings = {
@@ -112,7 +116,7 @@ async function ingestYearly(db) {
     console.log({reqUrl})
 
     const res = await axios.get(reqUrl)
-    const values = valuesToDates(res, 'yyyy')
+    const values = valuesToDates(res, 'yyyy', 1)
     console.log(values)
 
     for (const date in values) {
@@ -128,7 +132,13 @@ open({
 }).then(async db => {
 
     try {
-        if (args.data === 'instant') {
+        if (args.data === 'all') {
+            await ingestInstant(db)
+            await ingestDaily(db)
+            await ingestMonthly(db)
+            await ingestYearly(db)
+            console.log('All ingested')
+        }else if (args.data === 'instant') {
             await ingestInstant(db)
             console.log('Instant ingested')
         } else if(args.data === 'daily') {
@@ -140,9 +150,15 @@ open({
         } else if(args.data === 'yearly') {
             await ingestYearly(db)
             console.log('Yearly ingested')
+        } else {
+            console.log(args.data, 'not recognised')
         }
     } catch(e) {
         console.log(e.response || e)
     }
     
 })
+
+module.exports = {
+   ingestInstant
+}

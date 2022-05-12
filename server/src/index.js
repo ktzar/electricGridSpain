@@ -1,6 +1,7 @@
 const express = require('express')
 const sqlite3 = require('sqlite3')
 const {open} = require('sqlite')
+const { ingestInstant } = require('./ingest')
 
 const app = express()
 let db
@@ -11,6 +12,13 @@ const statements = {
     dailyLatest: 'select * from daily order by day desc limit 0,30',
     monthlyLatest: 'select * from monthly order by month desc limit 0,30',
     yearlyLatest: 'select * from yearly order by year desc limit 0,30'
+}
+
+const oneHour = 1000 * 60 * 60
+
+function ingestInstantForever() {
+    ingestInstant(db)
+    setTimeout(ingestInstantForever, oneHour)
 }
 
 app.get('/instant', async (req, res) => {
@@ -43,6 +51,7 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     db = adb
+    ingestInstantForever()
     app.listen('9000', () => {
         console.log('Server started')
     })
