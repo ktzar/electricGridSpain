@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import Today from './components/Today';
+import 'chart.js/auto';
 import Averages from './components/Averages';
 import Production from './components/Production';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query'

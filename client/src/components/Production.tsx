@@ -1,24 +1,72 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { colours } from '../shared/colours'
 import { EnergyLineChart } from './EnergyLineChart'
+    import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
+
+const chartOptions = {
+    responsive: true,
+    plugins: {
+        title: {
+            display: true,
+            text: 'Production per period (GWh)'
+        },
+    legend: {
+        display: false
+    },
+    },
+    elements: {
+        point:{
+            radius: 0
+        }
+    },
+    interaction: {
+        intersect: false,
+    },
+    scales: {
+        x: {
+            display: false,
+            title: {
+                display: true
+            }
+        },
+        y: {
+            display: true,
+            title: {
+                display: true,
+                text: 'GWh'
+            },
+        }
+    }
+};
+
+
+const labelToDataset = data => label => (
+    {
+        label,
+        data: data.map(k => k[label]),
+        borderColor: colours[label],
+        tension: 0.4,
+        borderWidth: 1
+    }
+)
+
+const sortByField = field => (a,b) => a[field] > b[field] ? 1 : -1
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('latestData', () => {
-        return fetch('/api/latest')
-            .then(res => res.json())
+        return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
     })
 
     const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
-        fetch('/api/daily').then(res => res.json())
+        fetch('/api/daily').then(res => res.json()).then(d => d.sort(sortByField('day')))
     )
 
     const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
-        fetch('/api/monthly').then(res => res.json())
+        fetch('/api/monthly').then(res => res.json()).then(d => d.sort(sortByField('month')))
     )
 
     const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', () =>
-        fetch('/api/yearly').then(res => res.json())
+        fetch('/api/yearly').then(res => res.json()).then(d => d.sort(sortByField('year')))
     )
 
     if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
@@ -27,37 +75,47 @@ export default () => {
        </div>
     }
 
+    console.log({latestData, dailyData, monthlyData, yearlyData})
+
+    const clearLabels = Object.keys(latestData[0]).filter(k => k !== 'time')
+
     return (
         <>
         <div className="card mt-2">
           <div className="card-header">
-        National Grid: Live Status (9:00pm 27/04/2022)
+        Recent production per source
         </div>
           <div className="card-body">
             <div className="row">
                 <div className="col">
-                    <h5>Last 24h</h5>
-                    <EnergyLineChart
-                        xAxis="time"
-                        series={latestData.reverse()} />
+                    <h5 className="text-center">Last {parseInt(latestData.length / 6)} hours</h5>
+                    <Line options={chartOptions} data={{
+                        labels: latestData.map(k => k.time),
+                        datasets: clearLabels.map(labelToDataset(latestData))
+                    }}/>
                 </div>
                 <div className="col">
-                    <h5>Last 30 days</h5>
-                    <EnergyLineChart
-                        xAxis="day"
-                        series={dailyData.reverse()} />
+                    <h5 className="text-center">Last {dailyData.length} days</h5>
+                    <Line options={chartOptions} data={{
+                        labels: dailyData.map(k => k.day),
+                        datasets: clearLabels.map(labelToDataset(dailyData))
+                    }}/>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col">
+                    <h5 className="text-center">Last {monthlyData.length} months</h5>
+                    <Line options={chartOptions} data={{
+                        labels: monthlyData.map(k => k.month),
+                        datasets: clearLabels.map(labelToDataset(monthlyData))
+                    }}/>
                 </div>
                 <div className="col">
-                    <h5>Last months</h5>
-                    <EnergyLineChart
-                        xAxis="month"
-                        series={monthlyData.reverse()} />
-                </div>
-                <div className="col">
-                    <h5>Last years</h5>
-                    <EnergyLineChart
-                        xAxis="year"
-                        series={yearlyData.reverse()} />
+                    <h5 className="text-center">Last {yearlyData.length} years</h5>
+                    <Line options={chartOptions} data={{
+                        labels: yearlyData.map(k => k.year),
+                        datasets: clearLabels.map(labelToDataset(yearlyData))
+                    }}/>
                 </div>
             </div>
           </div>

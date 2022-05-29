@@ -3,7 +3,7 @@ const args = require('args-parser')(process.argv)
 const { parseISO, format, subDays, addDays } = require('date-fns')
 const {open} = require('sqlite')
 const parseJsonp = require('parse-jsonp')
-let axios = require('axios')
+const axios = require('axios')
 
 function valuesToDates(res, dateFormat, extraDays = 0) {
     const values = {}
@@ -43,21 +43,25 @@ const statements = {
 }
 
 async function ingestInstant(db) {
-    const date = format(new Date(), 'yyyy-MM-dd')
-    console.log(date)
-    const reqUrl = getDemandaUrl(date)
+    try {
+        const date = format(new Date(), 'yyyy-MM-dd')
+        console.log(date)
+        const reqUrl = getDemandaUrl(date)
 
-    const res = await axios.get(reqUrl)
-    const data = parseJsonp('callback', res.data)
+        const res = await axios.get(reqUrl)
+        const data = parseJsonp('callback', res.data)
 
-    let updatedRowsCount = 0
-    for (let v of data.valoresHorariosGeneracion) {
-        const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.inter, v.termRenov, v.cogenResto, v.cc, v.car])
-        if (res.lastId>0) {
-            updatedRowsCount++
+        let updatedRowsCount = 0
+        for (let v of data.valoresHorariosGeneracion) {
+            const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.inter, v.termRenov, v.cogenResto, v.cc, v.car])
+            if (res.lastId>0) {
+                updatedRowsCount++
+            }
         }
+        console.log(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
+    } catch (e) {
+        console.error(`Error when updating instant data ${e}`)
     }
-    console.log(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
 }
 
 const readingMappings = {
@@ -81,14 +85,18 @@ async function ingestDaily(db) {
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
     console.log({reqUrl})
 
-    const res = await axios.get(reqUrl)
-    const values = valuesToDates(res, 'yyyy-MM-dd')
-    console.log(values)
+    try {
+        const res = await axios.get(reqUrl)
+        const values = valuesToDates(res, 'yyyy-MM-dd')
+        console.log(values)
 
-    for (const date in values) {
-        const readings = values[date]
-        const res = await db.run(statements.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
-        console.log(res.lastID)
+        for (const date in values) {
+            const readings = values[date]
+            const res = await db.run(statements.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            console.log(res.lastID)
+        }
+    } catch(e) { 
+        console.error(`Error updating daily data ${e}`)
     }
 }
 
@@ -98,31 +106,41 @@ async function ingestMonthly(db) {
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
     console.log({reqUrl})
 
-    const res = await axios.get(reqUrl)
-    const values = valuesToDates(res, 'yyyy-MM')
-    console.log(values)
+    try {
+        const res = await axios.get(reqUrl)
+        const values = valuesToDates(res, 'yyyy-MM')
+        console.log(values)
 
-    for (const date in values) {
-        const readings = values[date]
-        const res = await db.run(statements.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
-        console.log(res.lastID)
+        for (const date in values) {
+            const readings = values[date]
+            const res = await db.run(statements.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            console.log(res.lastID)
+        }
+    } catch(e) { 
+        console.error(`Error updating monthly data ${e}`)
     }
 }
 
 async function ingestYearly(db) {
-    const startDate = format(subDays(new Date(), 365*3), 'yyyy-MM-dd')
-    const endDate = format(new Date(), 'yyyy-MM-dd')
+    const startDate = '2021-01-01'
+    const endDate = '2021-12-31'
+    //const startDate = format(subDays(new Date(), 365*2), 'yyyy-MM-dd')
+    //const endDate = format(subDays(new Date(), 365*4), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
     console.log({reqUrl})
 
-    const res = await axios.get(reqUrl)
-    const values = valuesToDates(res, 'yyyy', 1)
-    console.log(values)
+    try {
+        const res = await axios.get(reqUrl)
+        const values = valuesToDates(res, 'yyyy', 1)
+        console.log(values)
 
-    for (const date in values) {
-        const readings = values[date]
-        const res = await db.run(statements.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
-        console.log(res.lastID)
+        for (const date in values) {
+            const readings = values[date]
+            const res = await db.run(statements.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            console.log(res.lastID)
+        }
+    } catch(e) { 
+        console.error(`Error updating yearly data ${e}`)
     }
 }
 

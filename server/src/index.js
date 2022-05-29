@@ -28,22 +28,22 @@ app.get('/instant', async (req, res) => {
 
 app.get('/latest', async (req, res) => {
     const row = await db.all(statements.instantLatest)
-    res.send(row)
+    res.send(row.reverse())
 })
 
 app.get('/daily', async (req, res) => {
     const row = await db.all(statements.dailyLatest)
-    res.send(row)
+    res.send(row.reverse())
 })
 
 app.get('/monthly', async (req, res) => {
     const row = await db.all(statements.monthlyLatest)
-    res.send(row)
+    res.send(row.reverse())
 })
 
 app.get('/yearly', async (req, res) => {
     const row = await db.all(statements.yearlyLatest)
-    res.send(row)
+    res.send(row.reverse())
 })
 
 open({
