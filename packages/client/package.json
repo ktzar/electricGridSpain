@@ -1,17 +1,19 @@
 {
-    "name": "client",
+    "name": "@ktz/client",
     "private": true,
     "version": "0.0.0",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "test": "echo \"Error: no test specified\" && exit 0"
     },
     "dependencies": {
         "chart.js": "^3.7.1",
         "chartist": "^0.11.4",
         "highcharts": "^10.1.0",
         "highcharts-react-official": "^3.1.0",
+        "jest": "^28.1.1",
         "react": "^17.0.2",
         "react-chartist": "^0.14.4",
         "react-chartjs-2": "^4.1.0",
