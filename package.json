@@ -1,0 +1,11 @@
+{
+  "name": "electricGridSpain",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:ktzar/electricGridSpain.git",
+  "author": "Miguel Gonzalez <miguel.gonzalez6@vodafone.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^5.1.4"
+  }
+}
