@@ -1,9 +1,12 @@
-const sqlite3 = require('sqlite3')
-const args = require('args-parser')(process.argv)
-const { parseISO, format, subDays, addDays } = require('date-fns')
-const {open} = require('sqlite')
-const parseJsonp = require('parse-jsonp')
-const axios = require('axios')
+import sqlite3 from 'sqlite3'
+import argsParser from 'args-parser'
+import { parseISO, format, subDays, addDays } from 'date-fns'
+import {open} from 'sqlite'
+import parseJsonp from 'parse-jsonp'
+import axios from 'axios'
+import { ingest } from './statements.js'
+
+const args = argsParser(process.argv)
 
 function valuesToDates(res, dateFormat, extraDays = 0) {
     const values = {}
@@ -34,29 +37,19 @@ const getGeneracionUrl = (startDate, endDate, trunc) =>
 const getDemandaUrl = date =>
     'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha={date}'
         .replace('{date}', date)
-
-const excluded = 'update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, inter=excluded.inter, thermal=excluded.thermal, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
-const commonCols = 'solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon'
-const statements = {
-    instant: `insert into instant (time, ${commonCols}, inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?) on conflict(time) do ${excluded};`,
-    daily: `insert into daily (day, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(day) ${excluded};`,
-    hourly: `insert into hourly (hour, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(hour) ${excluded};`,
-    monthly: `insert into monthly (month, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(month) ${excluded};`,
-    year: `insert into yearly (year, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(year) ${excluded};`
-}
-
-async function ingestInstant(db) {
+export async function ingestInstant(db) {
     try {
         const date = format(new Date(), 'yyyy-MM-dd')
-        console.log(date)
         const reqUrl = getDemandaUrl(date)
+        console.log({reqUrl})
 
         const res = await axios.get(reqUrl)
+        console.log(res.data)
         const data = parseJsonp('callback', res.data)
 
         let updatedRowsCount = 0
         for (let v of data.valoresHorariosGeneracion) {
-            const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
+            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
             if (res.lastId>0) {
                 updatedRowsCount++
             }
@@ -65,6 +58,7 @@ async function ingestInstant(db) {
     } catch (e) {
 
         console.error(`Error when updating instant data ${e}`)
+        console.error(e.stack)
     }
 }
 
@@ -96,11 +90,34 @@ async function ingestDaily(db) {
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(statements.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
         console.error(`Error updating daily data ${e}`)
+        console.error(e.stack)
+    }
+}
+
+
+async function ingestHourly(db) {
+    const startDate = format(subDays(new Date(), 5), 'yyyy-MM-dd')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
+    const reqUrl = getGeneracionUrl(startDate, endDate, 'hour')
+    console.log({reqUrl})
+
+    try {
+        const res = await axios.get(reqUrl)
+        const values = valuesToDates(res, 'yyyy-MM-HH')
+        console.log(values)
+
+        for (const date in values) {
+            const readings = values[date]
+            const res = await db.run(ingest.hourly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            console.log(res.lastID)
+        }
+    } catch(e) { 
+        console.error(`Error updating monthly data ${e}`)
     }
 }
 
@@ -117,7 +134,7 @@ async function ingestMonthly(db) {
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(statements.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
@@ -140,7 +157,7 @@ async function ingestYearly(db) {
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(statements.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
@@ -150,7 +167,7 @@ async function ingestYearly(db) {
 
 open({
     filename: './database.db',
-    driver: sqlite3.Database
+    driver: sqlite3.verbose().Database
 }).then(async db => {
 
     try {
@@ -166,6 +183,9 @@ open({
         } else if(args.data === 'daily') {
             await ingestDaily(db)
             console.log('Daily ingested')
+        } else if(args.data === 'hourly') {
+            await ingestHourly(db)
+            console.log('Hourly ingested')
         } else if(args.data === 'monthly') {
             await ingestMonthly(db)
             console.log('Monthly ingested')
@@ -180,7 +200,3 @@ open({
     }
     
 })
-
-module.exports = {
-   ingestInstant
-}

@@ -1,18 +1,11 @@
-const express = require('express')
-const sqlite3 = require('sqlite3')
-const {open} = require('sqlite')
-const { ingestInstant } = require('./ingest')
+import express from 'express'
+import sqlite3 from 'sqlite3'
+import {open} from 'sqlite'
+import { ingestInstant } from './ingest.js'
+import { select } from './statements.js'
 
 const app = express()
 let db
-
-const statements = {
-    instantLast: 'select * from instant order by time desc limit 0,1',
-    instantLatest: 'select * from instant order by time desc limit 0,144',
-    dailyLatest: 'select * from daily order by day desc limit 0,30',
-    monthlyLatest: 'select * from monthly order by month desc limit 0,30',
-    yearlyLatest: 'select * from yearly order by year desc limit 0,30'
-}
 
 const oneHour = 1000 * 60 * 60
 
@@ -22,27 +15,27 @@ function ingestInstantForever() {
 }
 
 app.get('/instant', async (req, res) => {
-    const row = await db.get(statements.instantLast)
+    const row = await db.get(select.instantLast)
     res.send(row)
 })
 
 app.get('/latest', async (req, res) => {
-    const row = await db.all(statements.instantLatest)
+    const row = await db.all(select.instantLatest)
     res.send(row.reverse())
 })
 
 app.get('/daily', async (req, res) => {
-    const row = await db.all(statements.dailyLatest)
+    const row = await db.all(select.dailyLatest)
     res.send(row.reverse())
 })
 
 app.get('/monthly', async (req, res) => {
-    const row = await db.all(statements.monthlyLatest)
+    const row = await db.all(select.monthlyLatest)
     res.send(row.reverse())
 })
 
 app.get('/yearly', async (req, res) => {
-    const row = await db.all(statements.yearlyLatest)
+    const row = await db.all(select.yearlyLatest)
     res.send(row.reverse())
 })
 
