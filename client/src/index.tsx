@@ -13,11 +13,12 @@ const App = () => {
     return (<>
       <QueryClientProvider client={queryClient}>
         <div className="container">
-            <h1>Spanish grid dashboard</h1>
+            <h1 className="text-center">Spanish grid dashboard</h1>
             <h2>Today</h2>
             <Today/>
             <Averages/>
             <Production/>
+            <div className="text-center m-t-5">by <a href="https://github.com/ktzar">ktz</a></div>
         </div>
       </QueryClientProvider>
     </>);

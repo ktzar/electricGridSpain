@@ -1,7 +1,8 @@
 import { colours } from '../shared/colours'
 import { EnergyLineChart } from './EnergyLineChart'
-    import { Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
+import { queryOptions } from '../shared/queryOptions';
 
 const chartOptions = {
     responsive: true,
@@ -10,10 +11,11 @@ const chartOptions = {
             display: true,
             text: 'Production per period (GWh)'
         },
-    legend: {
-        display: false
+        legend: {
+            display: false
+        },
     },
-    },
+    animation: { duration: 0 },
     elements: {
         point:{
             radius: 0
@@ -45,8 +47,8 @@ const labelToDataset = data => label => (
         label,
         data: data.map(k => k[label]),
         borderColor: colours[label],
-        tension: 0.4,
-        borderWidth: 1
+        tension: 0,
+        borderWidth: 1.5
     }
 )
 
@@ -55,19 +57,19 @@ const sortByField = field => (a,b) => a[field] > b[field] ? 1 : -1
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('latestData', () => {
         return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
-    })
+    }, queryOptions)
 
     const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
-        fetch('/api/daily').then(res => res.json()).then(d => d.sort(sortByField('day')))
-    )
+        fetch('/api/daily').then(res => res.json())
+    , queryOptions)
 
     const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
         fetch('/api/monthly').then(res => res.json()).then(d => d.sort(sortByField('month')))
-    )
+    , queryOptions)
 
     const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', () =>
         fetch('/api/yearly').then(res => res.json()).then(d => d.sort(sortByField('year')))
-    )
+    , queryOptions)
 
     if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
         return <div class="spinner-border" role="status">

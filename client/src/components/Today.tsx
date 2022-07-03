@@ -2,6 +2,7 @@
 import { useQuery } from 'react-query'
 import { colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
+import { queryOptions } from '../shared/queryOptions';
 //import ChartistGraph from 'react-chartist';
 
 const doughOptions = {
@@ -22,12 +23,16 @@ const doughOptions = {
     }
 }
 
+const formatter = Intl.NumberFormat('en-GB')
+const formatAmount = nmb => formatter.format(nmb)
+
+
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', () => {
         return fetch('/api/instant')
             .then(res => res.json())
-    })
+    }, queryOptions)
     console.log({ isLoading, error, latestData })
 
     if (isLoading) {
@@ -94,25 +99,23 @@ export default () => {
                 </div>
             </div>
             <div className="col">
-                <div className="card">
-                  <div className="card-header card-header-danger">59% Fossil fuels</div>
-                  <div className="card-body">
-                    <table>
+                    <table className="table table-bordered">
+                        <thead style={{background: '#fcc'}}>
+                            <tr><td colSpan="2">59% Fossil Fuels</td></tr>
+                        </thead>
                         <tbody>
-                            <tr><td>Carbon</td><td>{latestData?.carbon}GW</td></tr>
-                            <tr><td>Gas</td><td>{latestData?.gas}GW</td></tr>
+                            <tr><td>Carbon</td><td>{formatAmount(latestData?.carbon)} GW</td></tr>
+                            <tr><td>Gas</td><td>{formatAmount(latestData?.gas)} GW</td></tr>
                         </tbody>
                     </table>
-                  </div>
-                </div>
                 <div className="card mt-2">
-                  <div className="card-header bg-primary">33% Renewables</div>
+                  <div className="card-header" style={{background: '#cfc'}}>33% Renewables</div>
                   <div className="card-body">
-                    <table>
+                    <table className="table table-bordered">
                         <tbody>
-                            <tr><td>Solar</td><td>{latestData?.solarpv}GW</td></tr>
-                            <tr><td>Solar Thermal</td><td>{latestData?.solarthermal}GW</td></tr>
-                            <tr><td>Wind</td><td>{latestData?.wind}GW</td></tr>
+                            <tr><td>Solar</td><td>{formatAmount(latestData?.solarpv)} GW</td></tr>
+                            <tr><td>Solar Thermal</td><td>{formatAmount(latestData?.solarthermal)} GW</td></tr>
+                            <tr><td>Wind</td><td>{formatAmount(latestData?.wind)} GW</td></tr>
                         </tbody>
                     </table>
                   </div>
@@ -127,6 +130,11 @@ export default () => {
                 <div className="card mt-2">
                   <div className="card-header">33% Interconnectors</div>
                   <div className="card-body">
+                    <table className="table table-bordered">
+                        <tbody>
+                            <tr><td>Interchanges</td><td>{formatAmount(latestData?.inter)} GW</td></tr>
+                        </tbody>
+                    </table>
                   </div>
                 </div>
             </div>
