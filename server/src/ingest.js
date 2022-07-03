@@ -32,14 +32,17 @@ const getGeneracionUrl = (startDate, endDate, trunc) =>
         .replace('{trunc}', trunc)
 
 const getDemandaUrl = date =>
-    'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&curva=DEMANDA&fecha={date}'
+    'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha={date}'
         .replace('{date}', date)
 
+const excluded = 'update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, inter=excluded.inter, thermal=excluded.thermal, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
+const commonCols = 'solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon'
 const statements = {
-    instant: 'insert into instant (time, solarpv, wind, solarthermal, nuclear, hidro, inter, thermal, cogen, gas, carbon) values(?,?,?,?,?,?,?,?,?,?,?) on conflict(time) do update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, inter=excluded.inter, thermal=excluded.thermal, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon;',
-    daily: 'insert into daily (day, solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon) values(?,?,?,?,?,?,?,?,?) on conflict(day) do update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon;',
-    monthly: 'insert into monthly (month, solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon) values(?,?,?,?,?,?,?,?,?) on conflict(month) do update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon;',
-    year: 'insert into yearly (year, solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon) values(?,?,?,?,?,?,?,?,?) on conflict(year) do update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon;'
+    instant: `insert into instant (time, ${commonCols}, inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?) on conflict(time) do ${excluded};`,
+    daily: `insert into daily (day, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(day) ${excluded};`,
+    hourly: `insert into hourly (hour, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(hour) ${excluded};`,
+    monthly: `insert into monthly (month, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(month) ${excluded};`,
+    year: `insert into yearly (year, ${commonCols}) values(?,?,?,?,?,?,?,?,?) on conflict(year) ${excluded};`
 }
 
 async function ingestInstant(db) {
@@ -53,13 +56,14 @@ async function ingestInstant(db) {
 
         let updatedRowsCount = 0
         for (let v of data.valoresHorariosGeneracion) {
-            const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.inter, v.termRenov, v.cogenResto, v.cc, v.car])
+            const res = await db.run(statements.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
             if (res.lastId>0) {
                 updatedRowsCount++
             }
         }
         console.log(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
     } catch (e) {
+
         console.error(`Error when updating instant data ${e}`)
     }
 }
@@ -80,7 +84,7 @@ const readingMappings = {
 }
 
 async function ingestDaily(db) {
-    const startDate = format(subDays(new Date(), 30), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
     console.log({reqUrl})
