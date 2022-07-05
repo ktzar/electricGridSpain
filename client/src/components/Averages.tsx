@@ -61,21 +61,24 @@ export default () => {
     const { isLoading: isLoadingInstant, data: latestData } = useQuery('latestData', () => {
         return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
     }, queryOptions)
-
     const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
         fetch('/api/daily').then(res => res.json())
     , queryOptions)
     const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
-        fetch('/api/monthly').then(res => res.json())
+        fetch('/api/monthly').then(res => res.json()).then(d => d.sort(sortByField('month')))
     , queryOptions)
+
     if (isLoadingInstant || isLoadingMonthly || isLoadingDaily) {
         return <div className="spinner-border" role="status">
            <span className="sr-only">Loading...</span>
        </div>
     }
+
+    const last12MonthlyData = monthlyData.slice(monthlyData.length - 12)
+
     const recentHoursData = prepareSeriesForDoughnut(latestData, 'time')
     const recentDaysData = prepareSeriesForDoughnut(dailyData, 'day')
-    const recentMonthsData = prepareSeriesForDoughnut(monthlyData, 'month')
+    const recentMonthsData = prepareSeriesForDoughnut(last12MonthlyData, 'month')
 
     return (
         <>
@@ -98,7 +101,7 @@ export default () => {
                         data={recentDaysData}/>
                 </div>
                 <div className="col-sm">
-                    <h4>Last {monthlyData.length} months</h4>
+                    <h4>Last {last12MonthlyData.length} months</h4>
                     <Doughnut
                         options={doughOptions}
                         data={recentMonthsData}/>

@@ -1,9 +1,8 @@
-//import { Legend, Tooltip, PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts'
 import { useQuery } from 'react-query'
 import { colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
-//import ChartistGraph from 'react-chartist';
+import { SourceIndicator } from './SourceIndicator';
 
 const doughOptions = {
     responsive: true,
@@ -25,8 +24,13 @@ const doughOptions = {
 
 const formatter = Intl.NumberFormat('en-GB')
 const formatAmount = nmb => formatter.format(nmb)
-
-
+const sumObjectValues = data => {
+    let all = 0
+    for (let key in data) {
+        all += parseInt(data[key])
+    }
+    return all
+}
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', () => {
@@ -45,8 +49,6 @@ export default () => {
         ? clearLabels.map(k => ({ name: k, value: latestData[k]}))
         : []
 
-
-
     const doughData = {
         labels: Object.keys(latestData).filter(k => k !== 'time'),
         datasets: [
@@ -58,7 +60,14 @@ export default () => {
         ],
     }
 
-    console.log({doughData})
+    const all = sumObjectValues(latestData)
+    const renewables = latestData.solarpv + latestData.solarthermal + latestData.wind + latestData.hidro
+    const clean = latestData.nuclear
+    const fossil = latestData.gas + latestData.cogen + latestData.carbon
+
+    const toPerc = val => parseInt( 100 * val / all) + '%'
+
+    console.log({doughData, latestData})
 
     return (
         <>
@@ -81,7 +90,7 @@ export default () => {
         <div className="row mt-2">
             <div className="col">
                 <div className="card">
-                  <div className="card-header"> 33.1 GW demand </div>
+                  <div className="card-header"> {formatAmount((all / 1000).toFixed(2))} GW demand </div>
                   <div className="card-body">
                         <Doughnut options={doughOptions} data={doughData} />
                         {/*
@@ -101,42 +110,42 @@ export default () => {
             <div className="col">
                     <table className="table table-bordered">
                         <thead style={{background: '#fcc'}}>
-                            <tr><td colSpan="2">59% Fossil Fuels</td></tr>
+                            <tr><td colSpan="2">{toPerc(fossil)} Fossil Fuels</td></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Carbon</td><td>{formatAmount(latestData?.carbon)} GW</td></tr>
-                            <tr><td>Gas</td><td>{formatAmount(latestData?.gas)} GW</td></tr>
+                            <tr><td><SourceIndicator type="carbon"/>Carbon</td><td>{formatAmount(latestData?.carbon)} GW</td></tr>
+                            <tr><td><SourceIndicator type="gas"/>Gas</td><td>{formatAmount(latestData?.gas)} GW</td></tr>
                         </tbody>
                     </table>
-                <div className="card mt-2">
-                  <div className="card-header" style={{background: '#cfc'}}>33% Renewables</div>
-                  <div className="card-body">
                     <table className="table table-bordered">
+                        <thead style={{background: '#cfc'}}>
+                            <tr><td colSpan="2">{toPerc(renewables)} Renewables</td></tr>
+                        </thead>
                         <tbody>
-                            <tr><td>Solar</td><td>{formatAmount(latestData?.solarpv)} GW</td></tr>
-                            <tr><td>Solar Thermal</td><td>{formatAmount(latestData?.solarthermal)} GW</td></tr>
-                            <tr><td>Wind</td><td>{formatAmount(latestData?.wind)} GW</td></tr>
+                            <tr><td><SourceIndicator type="solarpv"/>Solar</td><td>{formatAmount(latestData?.solarpv)} GW</td></tr>
+                            <tr><td><SourceIndicator type="solarthermal"/>Solar Thermal</td><td>{formatAmount(latestData?.solarthermal)} GW</td></tr>
+                            <tr><td><SourceIndicator type="wind"/>Wind</td><td>{formatAmount(latestData?.wind)} GW</td></tr>
                         </tbody>
                     </table>
-                  </div>
-                </div>
             </div>
             <div className="col">
-                <div className="card">
-                  <div className="card-header">59% Other sources</div>
-                  <div className="card-body">
-                  </div>
-                </div>
-                <div className="card mt-2">
-                  <div className="card-header">33% Interconnectors</div>
-                  <div className="card-body">
-                    <table className="table table-bordered">
-                        <tbody>
-                            <tr><td>Interchanges</td><td>{formatAmount(latestData?.inter)} GW</td></tr>
-                        </tbody>
-                    </table>
-                  </div>
-                </div>
+                <table className="table table-bordered">
+                    <thead style={{background: '#777', color: 'white'}}>
+                        <tr><td colSpan="2">{toPerc(clean)} Other sources</td></tr>
+                    </thead>
+                    <tbody>
+                            <tr><td><SourceIndicator type="nuclear"/>Nuclear</td><td>{formatAmount(latestData?.nuclear)} GW</td></tr>
+                            <tr><td><SourceIndicator type="thermal"/>Thermal</td><td>{formatAmount(latestData?.thermal)} GW</td></tr>
+                    </tbody>
+                </table>
+                <table className="table table-bordered">
+                    <thead style={{background: '#ccc'}}>
+                        <tr><td colSpan="2">{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><SourceIndicator type="inter"/>Interchanges</td><td>{formatAmount(latestData?.inter)} GW</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         </>
