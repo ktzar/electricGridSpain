@@ -44,7 +44,6 @@ export async function ingestInstant(db) {
         console.log({reqUrl})
 
         const res = await axios.get(reqUrl)
-        console.log(res.data)
         const data = parseJsonp('callback', res.data)
 
         let updatedRowsCount = 0
@@ -77,7 +76,7 @@ const readingMappings = {
     Cogeneration: 'cogen',
 }
 
-async function ingestDaily(db) {
+export async function ingestDaily(db) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
@@ -100,7 +99,7 @@ async function ingestDaily(db) {
 }
 
 
-async function ingestHourly(db) {
+export async function ingestHourly(db) {
     const startDate = format(subDays(new Date(), 5), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'hour')
@@ -121,7 +120,7 @@ async function ingestHourly(db) {
     }
 }
 
-async function ingestMonthly(db) {
+export async function ingestMonthly(db) {
     const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
@@ -142,7 +141,7 @@ async function ingestMonthly(db) {
     }
 }
 
-async function ingestYearly(db) {
+export async function ingestYearly(db) {
     const startDate = '2021-01-01'
     const endDate = '2021-12-31'
     //const startDate = format(subDays(new Date(), 365*2), 'yyyy-MM-dd')

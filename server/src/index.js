@@ -1,18 +1,14 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
-import { ingestInstant } from './ingest.js'
+import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant } from './ingest.js'
 import { select } from './statements.js'
 
 const app = express()
 let db
 
 const oneHour = 1000 * 60 * 60
-
-function ingestInstantForever() {
-    ingestInstant(db)
-    setTimeout(ingestInstantForever, oneHour)
-}
+const oneDay = oneHour * 24
 
 app.get('/instant', async (req, res) => {
     const row = await db.get(select.instantLast)
@@ -45,6 +41,12 @@ open({
 }).then(adb => {
     db = adb
     ingestInstantForever()
+
+    setInterval(() => { ingestInstant(db) }, oneHour)
+    setInterval(() => { ingestDaily(db) }, oneHour * 12)
+    setInterval(() => { ingestMonthly(db) }, oneDay * 3)
+    setInterval(() => { ingestYearly(db) }, oneDay * 30)
+
     app.listen('9000', () => {
         console.log('Server started')
     })
