@@ -1,8 +1,12 @@
-import { colours } from '../shared/colours'
+import { colours, EnergyType } from '../shared/colours'
 
-export const SourceIndicator = ({type}) => {
+interface SourceIndicatorProps {
+    type: EnergyType
+}
+
+export const SourceIndicator = (props : SourceIndicatorProps) => {
     const styles = {
-        backgroundColor: colours[type],
+        backgroundColor: colours[props.type],
         width: '20px',
         height: '20px',
         display: 'inline-block',
