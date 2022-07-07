@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query'
-import { colours } from '../shared/colours'
+import { Colours, EnergyTypes, colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { SourceIndicator } from './SourceIndicator';
@@ -43,7 +43,7 @@ export default () => {
         return <span>Loading...</span>
     }
 
-    const clearLabels = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time')
+    const clearLabels = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
 
     const seriesData = !isLoading
         ? clearLabels.map(k => ({ name: k, value: latestData[k]}))
@@ -65,7 +65,7 @@ export default () => {
     const clean = latestData.nuclear
     const fossil = latestData.gas + latestData.cogen + latestData.carbon
 
-    const toPerc = val => parseInt( 100 * val / all) + '%'
+    const toPerc = (val : number) => parseInt( 100 * val / all).toString() + '%'
 
     console.log({doughData, latestData})
 
@@ -93,24 +93,13 @@ export default () => {
                   <div className="card-header"> {formatAmount((all / 1000).toFixed(2))} GW demand </div>
                   <div className="card-body">
                         <Doughnut options={doughOptions} data={doughData} />
-                        {/*
-                        <PieChart width={200} height={250}>
-                            <Pie data={seriesData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} fill="#82ca9d" label >
-                                {seriesData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={colours[entry.name]} />
-                                             ))}
-                            </Pie>
-                            <Legend />
-
-                        </PieChart>
-                        */}
                   </div>
                 </div>
             </div>
             <div className="col">
                     <table className="table table-bordered">
                         <thead style={{background: '#fcc'}}>
-                            <tr><td colSpan="2">{toPerc(fossil)} Fossil Fuels</td></tr>
+                            <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
                         </thead>
                         <tbody>
                             <tr><td><SourceIndicator type="carbon"/>Carbon</td><td>{formatAmount(latestData?.carbon)} GW</td></tr>
@@ -119,7 +108,7 @@ export default () => {
                     </table>
                     <table className="table table-bordered">
                         <thead style={{background: '#cfc'}}>
-                            <tr><td colSpan="2">{toPerc(renewables)} Renewables</td></tr>
+                            <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
                         </thead>
                         <tbody>
                             <tr><td><SourceIndicator type="solarpv"/>Solar</td><td>{formatAmount(latestData?.solarpv)} GW</td></tr>
@@ -131,7 +120,7 @@ export default () => {
             <div className="col">
                 <table className="table table-bordered">
                     <thead style={{background: '#777', color: 'white'}}>
-                        <tr><td colSpan="2">{toPerc(clean)} Other sources</td></tr>
+                        <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
                     </thead>
                     <tbody>
                             <tr><td><SourceIndicator type="nuclear"/>Nuclear</td><td>{formatAmount(latestData?.nuclear)} GW</td></tr>
@@ -140,7 +129,7 @@ export default () => {
                 </table>
                 <table className="table table-bordered">
                     <thead style={{background: '#ccc'}}>
-                        <tr><td colSpan="2">{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
+                        <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
                     </thead>
                     <tbody>
                         <tr><td><SourceIndicator type="inter"/>Interchanges</td><td>{formatAmount(latestData?.inter)} GW</td></tr>

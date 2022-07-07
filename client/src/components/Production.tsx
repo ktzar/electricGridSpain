@@ -41,8 +41,7 @@ const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
     }
 });
 
-
-const labelToDataset = data => label => (
+const labelToDataset = (data : Record<string, any>) => (label : string) => (
     {
         label,
         data: data.map(k => k[label]),
@@ -88,7 +87,7 @@ export default () => {
           <div className="card-body">
             <div className="row">
                 <div className="col">
-                    <h5 className="text-center">Last {parseInt(latestData.length / 6)} hours</h5>
+                    <h5 className="text-center">Last {parseInt(latestData.length / 6).toString()} hours</h5>
                     <Line options={chartOptions({title: 'Instant production'})} data={{
                         labels: latestData.map(k => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))

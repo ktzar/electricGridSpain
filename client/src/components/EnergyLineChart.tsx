@@ -1,7 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { colours } from '../shared/colours'
 
-export const EnergyLineChart = ({series, xAxis}) => {
+interface EnergyLineChartProps {
+    series: any[];
+    xAxis: any;
+}
+
+export const EnergyLineChart = ({series, xAxis} : EnergyLineChartProps) => {
     const lineProps = {
         strokeWidth: 1,
         dot: false

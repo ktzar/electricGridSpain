@@ -32,7 +32,7 @@ const dataToDoughnut = data => ({
 })
 
 const accumulateMeasurements = measList => 
-    measList.reduce((meas, acc) => {
+    measList.reduce((meas : object, acc : object) => {
         for (let key in meas) {
             if (acc[key])
                 acc[key] += meas[key]
