@@ -1,8 +1,10 @@
-export type EnergyTypes = 'solarpv' | 'wind' | 'solarthermal' | 'nuclear' | 'inter' | 'hidro' | 'thermal' | 'cogen' | 'gas' | 'carbon'
+export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'nuclear' , 'inter' , 'hidro' , 'thermal' , 'cogen' , 'gas' , 'carbon']
+export type EnergyType = typeof energyTypes[number]
 
-export type Colours = 'orange' | 'blue' | 'red' | 'purple' | 'pink' | 'lightblue' | 'grey' | 'yellow' | 'teal' | 'brown'
+export const acceptedColours = ['orange', 'blue' ,'red' ,'purple' ,'pink' ,'lightblue' ,'grey' ,'yellow' ,'teal' ,'brown']
+export type Colour = typeof acceptedColours[number]
 
-export const colours : Record<EnergyTypes, Colours> = {
+export const colours : Record<EnergyType, Colour> = {
     solarpv: 'orange',
     wind: 'blue',
     solarthermal: 'red',

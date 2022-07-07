@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query'
-import { Colours, EnergyTypes, colours } from '../shared/colours'
+import { Colour, EnergyType, colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { SourceIndicator } from './SourceIndicator';
@@ -9,7 +9,6 @@ const doughOptions = {
     plugins: {
         legend: {
             display: false,
-            position: 'top',
         },
         tooltips: {
             display: true,
@@ -23,11 +22,11 @@ const doughOptions = {
 }
 
 const formatter = Intl.NumberFormat('en-GB')
-const formatAmount = nmb => formatter.format(nmb)
-const sumObjectValues = data => {
+const formatAmount = (nmb : number) => formatter.format(nmb)
+const sumObjectValues = (data : Record<string, number>) => {
     let all = 0
     for (let key in data) {
-        all += parseInt(data[key])
+        all += Math.round(data[key]) | 0
     }
     return all
 }
@@ -43,7 +42,7 @@ export default () => {
         return <span>Loading...</span>
     }
 
-    const clearLabels = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
+    const clearLabels : EnergyType[] = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
 
     const seriesData = !isLoading
         ? clearLabels.map(k => ({ name: k, value: latestData[k]}))
@@ -65,7 +64,7 @@ export default () => {
     const clean = latestData.nuclear
     const fossil = latestData.gas + latestData.cogen + latestData.carbon
 
-    const toPerc = (val : number) => parseInt( 100 * val / all).toString() + '%'
+    const toPerc = (val : number) => Math.round( 100 * val / all).toString() + '%'
 
     console.log({doughData, latestData})
 
@@ -90,7 +89,7 @@ export default () => {
         <div className="row mt-2">
             <div className="col">
                 <div className="card">
-                  <div className="card-header"> {formatAmount((all / 1000).toFixed(2))} GW demand </div>
+                  <div className="card-header"> {formatAmount(parseFloat((all / 1000).toFixed(2)))} GW demand </div>
                   <div className="card-body">
                         <Doughnut options={doughOptions} data={doughData} />
                   </div>

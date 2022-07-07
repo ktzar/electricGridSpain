@@ -1,8 +1,8 @@
-import { colours } from '../shared/colours'
-import { EnergyLineChart } from './EnergyLineChart'
+import { Colour, colours, EnergyType } from '../shared/colours'
 import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
 import { queryOptions } from '../shared/queryOptions';
+import { sortByField, FieldEntity } from '../shared/fields';
 
 const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
     responsive: true,
@@ -41,17 +41,15 @@ const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
     }
 });
 
-const labelToDataset = (data : Record<string, any>) => (label : string) => (
+const labelToDataset = (data : Record<string, any>) => (label : EnergyType) => (
     {
         label,
-        data: data.map(k => k[label]),
+        data: data.map((k : any) => k[label]),
         borderColor: colours[label],
         tension: 0.3,
         borderWidth: 1.5
     }
 )
-
-const sortByField = field => (a,b) => a[field] > b[field] ? 1 : -1
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('latestData', () => {
@@ -87,16 +85,16 @@ export default () => {
           <div className="card-body">
             <div className="row">
                 <div className="col">
-                    <h5 className="text-center">Last {parseInt(latestData.length / 6).toString()} hours</h5>
+                    <h5 className="text-center">Last {Math.round(latestData.length / 6).toString()} hours</h5>
                     <Line options={chartOptions({title: 'Instant production'})} data={{
-                        labels: latestData.map(k => k.time),
+                        labels: latestData.map((k : FieldEntity) => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))
                     }}/>
                 </div>
                 <div className="col">
                     <h5 className="text-center">Last {dailyData.length} days</h5>
                     <Line options={chartOptions()} data={{
-                        labels: dailyData.map(k => k.day),
+                        labels: dailyData.map((k : FieldEntity) => k.day),
                         datasets: clearLabels.map(labelToDataset(dailyData))
                     }}/>
                 </div>
@@ -105,14 +103,14 @@ export default () => {
                 <div className="col">
                     <h5 className="text-center">Last {monthlyData.length} months</h5>
                     <Line options={chartOptions()} data={{
-                        labels: monthlyData.map(k => k.month),
+                        labels: monthlyData.map((k : FieldEntity) => k.month),
                         datasets: clearLabels.map(labelToDataset(monthlyData))
                     }}/>
                 </div>
                 <div className="col">
                     <h5 className="text-center">Last {yearlyData.length} years</h5>
                     <Line options={chartOptions()} data={{
-                        labels: yearlyData.map(k => k.year),
+                        labels: yearlyData.map((k : FieldEntity) => k.year),
                         datasets: clearLabels.map(labelToDataset(yearlyData))
                     }}/>
                 </div>

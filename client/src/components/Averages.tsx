@@ -1,17 +1,15 @@
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { useQuery } from 'react-query'
-import { colours } from '../shared/colours'
+import { colours, EnergyType } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
-
-const sortByField = field => (a,b) => a[field] > b[field] ? 1 : -1
+import { sortByField } from '../shared/fields';
 
 const doughOptions = {
     responsive: true,
     plugins: {
         legend: {
             display: false,
-            position: 'top',
         },
         title: {
             display: true,
@@ -20,19 +18,22 @@ const doughOptions = {
     }
 }
 
-const dataToDoughnut = data => ({
+type ListOfMeasurements = {name: EnergyType, value: number}[]
+
+const dataToDoughnut = (data : ListOfMeasurements) => ({
     labels: data.map(k => k.name),
     datasets: [
         {
             label: 'GWh',
-            data: data.map(k => parseInt(k.value)),
+            data: data.map(k => k.value),
             backgroundColor: data.map(k => colours[k.name]),
         }
     ]
 })
 
-const accumulateMeasurements = measList => 
-    measList.reduce((meas : object, acc : object) => {
+type MeasurementSet = Record<string, number>
+const accumulateMeasurements = (measList : MeasurementSet[]) => 
+    measList.reduce((meas, acc) => {
         for (let key in meas) {
             if (acc[key])
                 acc[key] += meas[key]
@@ -43,13 +44,13 @@ const accumulateMeasurements = measList =>
     }, {})
 
 
-const createKeyRemover = key => obj => {
+const createKeyRemover = (key : string) => (obj : Record<string, any>) => {
     const tmp = {...obj}
     delete tmp[key]
     return tmp
 }
 
-const prepareSeriesForDoughnut = (series, timeField) => {
+const prepareSeriesForDoughnut = (series : MeasurementSet[], timeField : string) => {
     const recentValues = accumulateMeasurements(series.map(createKeyRemover(timeField)))
     return dataToDoughnut(Object.keys(recentValues)
         .map(key => ({name: key, value: recentValues[key]}))
