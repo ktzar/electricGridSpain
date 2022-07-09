@@ -40,12 +40,10 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     db = adb
-    ingestInstantForever()
-
     setInterval(() => { ingestInstant(db) }, oneHour)
     setInterval(() => { ingestDaily(db) }, oneHour * 12)
     setInterval(() => { ingestMonthly(db) }, oneDay * 3)
-    setInterval(() => { ingestYearly(db) }, oneDay * 30)
+    //setInterval(() => { ingestYearly(db) }, oneDay * 30)
 
     app.listen('9000', () => {
         console.log('Server started')
