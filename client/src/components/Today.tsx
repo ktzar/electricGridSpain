@@ -34,11 +34,13 @@ const sumObjectValues = (data : Record<string, number>) => {
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', fetchInstant, queryOptions)
-    console.log({ isLoading, error, latestData })
-
     if (isLoading) {
         return <span>Loading...</span>
     }
+    if (!latestData) {
+        return <div>Error loading data</div>
+    }
+
 
     const clearLabels : EnergyType[] = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
 
@@ -99,8 +101,8 @@ export default () => {
                             <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
                         </thead>
                         <tbody>
-                            <tr><td><SourceIndicator type="carbon"/>Carbon</td><td>{formatAmount(latestData?.carbon)} GW</td></tr>
-                            <tr><td><SourceIndicator type="gas"/>Gas</td><td>{formatAmount(latestData?.gas)} GW</td></tr>
+                            <tr><td><SourceIndicator type="carbon"/>Carbon</td><td>{formatAmount(latestData.carbon)} GW</td></tr>
+                            <tr><td><SourceIndicator type="gas"/>Gas</td><td>{formatAmount(latestData.gas)} GW</td></tr>
                         </tbody>
                     </table>
                     <table className="table table-bordered">
@@ -108,9 +110,9 @@ export default () => {
                             <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
                         </thead>
                         <tbody>
-                            <tr><td><SourceIndicator type="solarpv"/>Solar</td><td>{formatAmount(latestData?.solarpv)} GW</td></tr>
-                            <tr><td><SourceIndicator type="solarthermal"/>Solar Thermal</td><td>{formatAmount(latestData?.solarthermal)} GW</td></tr>
-                            <tr><td><SourceIndicator type="wind"/>Wind</td><td>{formatAmount(latestData?.wind)} GW</td></tr>
+                            <tr><td><SourceIndicator type="solarpv"/>Solar</td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
+                            <tr><td><SourceIndicator type="solarthermal"/>Solar Thermal</td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
+                            <tr><td><SourceIndicator type="wind"/>Wind</td><td>{formatAmount(latestData.wind)} GW</td></tr>
                         </tbody>
                     </table>
             </div>
@@ -120,8 +122,8 @@ export default () => {
                         <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
                     </thead>
                     <tbody>
-                            <tr><td><SourceIndicator type="nuclear"/>Nuclear</td><td>{formatAmount(latestData?.nuclear)} GW</td></tr>
-                            <tr><td><SourceIndicator type="thermal"/>Thermal</td><td>{formatAmount(latestData?.thermal)} GW</td></tr>
+                            <tr><td><SourceIndicator type="nuclear"/>Nuclear</td><td>{formatAmount(latestData.nuclear)} GW</td></tr>
+                            <tr><td><SourceIndicator type="thermal"/>Thermal</td><td>{formatAmount(latestData.thermal)} GW</td></tr>
                     </tbody>
                 </table>
                 <table className="table table-bordered">
@@ -129,7 +131,7 @@ export default () => {
                         <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator type="inter"/>Interchanges</td><td>{formatAmount(latestData?.inter)} GW</td></tr>
+                        <tr><td><SourceIndicator type="inter"/>Interchanges</td><td>{formatAmount(latestData.inter)} GW</td></tr>
                     </tbody>
                 </table>
             </div>

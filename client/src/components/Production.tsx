@@ -5,7 +5,7 @@ import { queryOptions } from '../shared/queryOptions';
 import { sortByField, FieldEntity } from '../shared/fields';
 import { fetchDaily, fetchMonthly, fetchYearly } from '../shared/requests';
 
-const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
+const chartOptions = ({title = 'Average Production in period (GW)'} = {}) => ({
     responsive: true,
     plugins: {
         title: {
@@ -42,10 +42,10 @@ const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
     }
 });
 
-const labelToDataset = (data : Record<string, any>) => (label : EnergyType) => (
+const labelToDataset = (data : Record<string, any>, scaleDown = 1) => (label : EnergyType) => (
     {
         label,
-        data: data.map((k : any) => k[label]),
+        data: data.map((k : any) => k[label] / scaleDown),
         borderColor: colours[label],
         tension: 0.3,
         borderWidth: 1.5
@@ -88,7 +88,7 @@ export default () => {
                     <h5 className="text-center">Last {dailyData.length} days</h5>
                     <Line options={chartOptions()} data={{
                         labels: dailyData.map((k : FieldEntity) => k.day),
-                        datasets: clearLabels.map(labelToDataset(dailyData))
+                        datasets: clearLabels.map(labelToDataset(dailyData, 24))
                     }}/>
                 </div>
             </div>
@@ -97,14 +97,14 @@ export default () => {
                     <h5 className="text-center">Last {monthlyData.length} months</h5>
                     <Line options={chartOptions()} data={{
                         labels: monthlyData.map((k : FieldEntity) => k.month),
-                        datasets: clearLabels.map(labelToDataset(monthlyData))
+                        datasets: clearLabels.map(labelToDataset(monthlyData, 24*30))
                     }}/>
                 </div>
                 <div className="col">
                     <h5 className="text-center">Last {yearlyData.length} years</h5>
                     <Line options={chartOptions()} data={{
                         labels: yearlyData.map((k : FieldEntity) => k.year),
-                        datasets: clearLabels.map(labelToDataset(yearlyData))
+                        datasets: clearLabels.map(labelToDataset(yearlyData, 24*365))
                     }}/>
                 </div>
             </div>
