@@ -142,8 +142,8 @@ export async function ingestMonthly(db) {
 }
 
 export async function ingestYearly(db) {
-    const startDate = format(subDays(new Date(), 365*2), 'yyyy-MM-dd')
-    const endDate = format(new Date(), 'yyyy-MM-dd')
+    const startDate = '2016-01-01'//format(subDays(new Date(), 365*2), 'yyyy-MM-dd')
+    const endDate = '2020-12-31'//format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
     console.log({reqUrl})
 

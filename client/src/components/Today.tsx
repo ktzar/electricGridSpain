@@ -3,6 +3,7 @@ import { Colour, EnergyType, colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { SourceIndicator } from './SourceIndicator';
+import { fetchInstant } from '../shared/requests';
 
 const doughOptions = {
     responsive: true,
@@ -32,10 +33,7 @@ const sumObjectValues = (data : Record<string, number>) => {
 }
 
 export default () => {
-    const { isLoading, error, data: latestData } = useQuery('instantData', () => {
-        return fetch('/api/instant')
-            .then(res => res.json())
-    }, queryOptions)
+    const { isLoading, error, data: latestData } = useQuery('instantData', fetchInstant, queryOptions)
     console.log({ isLoading, error, latestData })
 
     if (isLoading) {

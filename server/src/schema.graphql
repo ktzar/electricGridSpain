@@ -1,0 +1,75 @@
+interface Measurement {
+    solarpv: Float,
+    wind: Float,
+    solarthermal: Float,
+    nuclear: Float,
+    hidro: Float,
+    inter: Float,
+    thermal: Float,
+    cogen: Float,
+    gas: Float,
+    carbon: Float,
+}
+
+type Instant implements Measurement {
+    time: String!
+    solarpv: Float,
+    wind: Float,
+    solarthermal: Float,
+    nuclear: Float,
+    hidro: Float,
+    inter: Float,
+    thermal: Float,
+    cogen: Float,
+    gas: Float,
+    carbon: Float,
+}
+
+type Day implements Measurement {
+    day: String!
+    solarpv: Float,
+    wind: Float,
+    solarthermal: Float,
+    nuclear: Float,
+    hidro: Float,
+    inter: Float,
+    thermal: Float,
+    cogen: Float,
+    gas: Float,
+    carbon: Float,
+}
+
+type Month implements Measurement {
+    month: String!
+    solarpv: Float,
+    wind: Float,
+    solarthermal: Float,
+    nuclear: Float,
+    hidro: Float,
+    inter: Float,
+    thermal: Float,
+    cogen: Float,
+    gas: Float,
+    carbon: Float,
+}
+
+type Year implements Measurement {
+    year: String!
+    solarpv: Float,
+    wind: Float,
+    solarthermal: Float,
+    nuclear: Float,
+    hidro: Float,
+    inter: Float,
+    thermal: Float,
+    cogen: Float,
+    gas: Float,
+    carbon: Float,
+}
+
+ type Query {
+     latestInstant: Instant,
+     latestDaily(count: Int): [Day],
+     latestMonthly(count: Int): [Month],
+     latestYearly(count: Int): [Year]
+ }

@@ -16,18 +16,18 @@ export const createEnergeController = db => {
 
     energy.get('/daily', async (req, res) => {
         try{
-        const row = await db.all(select.dailyLatest)
-        res.send(row.reverse())
-        }catch(e) { console.log(e)}
+            const row = await db.all(select.dailyLatest(30))
+            res.send(row.reverse())
+        } catch(e) { console.log(e)}
     })
 
     energy.get('/monthly', async (req, res) => {
-        const row = await db.all(select.monthlyLatest)
+        const row = await db.all(select.monthlyLatest(12))
         res.send(row.reverse())
     })
 
     energy.get('/yearly', async (req, res) => {
-        const row = await db.all(select.yearlyLatest)
+        const row = await db.all(select.yearlyLatest(10))
         res.send(row.reverse())
     })
 

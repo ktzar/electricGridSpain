@@ -2,9 +2,9 @@
 export const select = {
     instantLast: 'select * from instant order by time desc limit 0,1',
     instantLatest: 'select * from instant order by time desc limit 0,144',
-    dailyLatest: 'select * from daily order by day desc limit 0,30',
-    monthlyLatest: 'select * from monthly order by month desc limit 0,30',
-    yearlyLatest: 'select * from yearly order by year desc limit 0,30'
+    dailyLatest: count => `select * from daily order by day desc limit 0,${count}`,
+    monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
+    yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`
 }
 
 const commonCols = 'solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon'

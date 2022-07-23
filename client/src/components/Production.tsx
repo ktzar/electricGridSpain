@@ -3,6 +3,7 @@ import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField, FieldEntity } from '../shared/fields';
+import { fetchDaily, fetchMonthly, fetchYearly } from '../shared/requests';
 
 const chartOptions = ({title = 'Production per period (GWh)'} = {}) => ({
     responsive: true,
@@ -56,17 +57,9 @@ export default () => {
         return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
     }, queryOptions)
 
-    const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
-        fetch('/api/daily').then(res => res.json())
-    , queryOptions)
-
-    const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
-        fetch('/api/monthly').then(res => res.json()).then(d => d.sort(sortByField('month')))
-    , queryOptions)
-
-    const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', () =>
-        fetch('/api/yearly').then(res => res.json()).then(d => d.sort(sortByField('year')))
-    , queryOptions)
+    const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', fetchDaily, queryOptions)
+    const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', fetchMonthly, queryOptions)
+    const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', fetchYearly, queryOptions)
 
     if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
         return <div className="spinner-border" role="status">

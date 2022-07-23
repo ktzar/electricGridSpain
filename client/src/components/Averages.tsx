@@ -4,6 +4,7 @@ import { colours, EnergyType } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField } from '../shared/fields';
+import { fetchDaily, fetchMonthly, fetchInstant } from '../shared/requests';
 
 const doughOptions = {
     responsive: true,
@@ -62,12 +63,8 @@ export default () => {
     const { isLoading: isLoadingInstant, data: latestData } = useQuery('latestData', () => {
         return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
     }, queryOptions)
-    const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', () =>
-        fetch('/api/daily').then(res => res.json())
-    , queryOptions)
-    const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', () =>
-        fetch('/api/monthly').then(res => res.json()).then(d => d.sort(sortByField('month')))
-    , queryOptions)
+    const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', fetchDaily, queryOptions)
+    const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', fetchMonthly, queryOptions)
 
     if (isLoadingInstant || isLoadingMonthly || isLoadingDaily) {
         return <div className="spinner-border" role="status">
