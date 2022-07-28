@@ -128,7 +128,7 @@ export async function ingestHourly(db) {
 }
 
 export async function ingestMonthly(db) {
-    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
     const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
     console.log({reqUrl})
@@ -150,8 +150,8 @@ export async function ingestMonthly(db) {
 }
 
 export async function ingestYearly(db) {
-    const startDate = '2016-01-01'//format(subDays(new Date(), 365*2), 'yyyy-MM-dd')
-    const endDate = '2020-12-31'//format(new Date(), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 365*5), 'yyyy-01-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
     console.log({reqUrl})
 
