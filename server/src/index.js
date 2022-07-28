@@ -1,7 +1,11 @@
+import fs from 'fs'
+import { fileURLToPath } from 'url';
+
+import path from 'path'
 import express from 'express'
 import dotenv from 'dotenv'
-import { select } from './statements.js'
 dotenv.config()
+import { select } from './statements.js'
 import { graphqlHTTP } from 'express-graphql'
 import { buildSchema } from 'graphql'
 import sqlite3 from 'sqlite3'
@@ -12,86 +16,13 @@ import { createEnergeController } from './controllers/energy.js'
 const app = express()
 const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 
-const oneHour = 1000 * 60 * 60
+const oneMinute = 1000 * 60
+const oneHour = oneMinute * 60
 const oneDay = oneHour * 24
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const schema = buildSchema(`
-interface Measurement {
-    solarpv: Float,
-    wind: Float,
-    solarthermal: Float,
-    nuclear: Float,
-    hidro: Float,
-    inter: Float,
-    thermal: Float,
-    cogen: Float,
-    gas: Float,
-    carbon: Float,
-}
-
-type Instant implements Measurement {
-    time: String!
-    solarpv: Float,
-    wind: Float,
-    solarthermal: Float,
-    nuclear: Float,
-    hidro: Float,
-    inter: Float,
-    thermal: Float,
-    cogen: Float,
-    gas: Float,
-    carbon: Float,
-}
-
-type Day implements Measurement {
-    day: String!
-    solarpv: Float,
-    wind: Float,
-    solarthermal: Float,
-    nuclear: Float,
-    hidro: Float,
-    inter: Float,
-    thermal: Float,
-    cogen: Float,
-    gas: Float,
-    carbon: Float,
-}
-
-type Month implements Measurement {
-    month: String!
-    solarpv: Float,
-    wind: Float,
-    solarthermal: Float,
-    nuclear: Float,
-    hidro: Float,
-    inter: Float,
-    thermal: Float,
-    cogen: Float,
-    gas: Float,
-    carbon: Float,
-}
-
-type Year implements Measurement {
-    year: String!
-    solarpv: Float,
-    wind: Float,
-    solarthermal: Float,
-    nuclear: Float,
-    hidro: Float,
-    inter: Float,
-    thermal: Float,
-    cogen: Float,
-    gas: Float,
-    carbon: Float,
-}
-
- type Query {
-     latestInstant: Instant,
-     latestDaily(count: Int): [Day],
-     latestMonthly(count: Int): [Month],
-     latestYearly(count: Int): [Year]
- }
-`)
+const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, 'schema.graphql')).toString())
 
 const root = db => ({
     latestInstant: async () => {
@@ -117,17 +48,19 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-    //setInterval(() => { ingestInstant(db) }, oneHour)
+    //setInterval(() => { ingestInstant(db) }, oneMinute * 30)
     //setInterval(() => { ingestDaily(db) }, oneHour * 12)
     //setInterval(() => { ingestMonthly(db) }, oneDay * 3)
     //setInterval(() => { ingestYearly(db) }, oneDay * 30)
     const energyController = createEnergeController(db)
-
-    app.use('/graphql', graphqlHTTP({
+    const graphQlController = graphqlHTTP({
         schema,
         rootValue: root(db),
         graphiql: true
-    }))
+    })
+
+    app.use('/graphql', graphQlController)
+    app.use('/api/graphql', graphQlController)
     app.use('/api/', energyController)
     app.use('/', energyController)
     app.use(express.static(PUBLIC_PATH))

@@ -10,6 +10,8 @@ COPY client/dist ./public
 RUN rm -fR node_modules
 RUN npm install
 COPY server/database.db ./
+COPY scripts/update_daily.sh /etc/periodic/daily/update_daily.sh
+COPY scripts/update_hourly.sh /etc/periodic/hourly/update_hourly.sh
 
 EXPOSE 8080
 CMD node ./src/index
