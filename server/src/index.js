@@ -48,10 +48,10 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-    //setInterval(() => { ingestInstant(db) }, oneMinute * 30)
-    //setInterval(() => { ingestDaily(db) }, oneHour * 12)
-    //setInterval(() => { ingestMonthly(db) }, oneDay * 3)
-    //setInterval(() => { ingestYearly(db) }, oneDay * 30)
+    ingestInstant(db)
+    setInterval(() => { ingestInstant(db) }, oneMinute * 30)
+    setInterval(() => { ingestDaily(db) }, oneHour * 12)
+    setInterval(() => { ingestYearly(db); ingestMonthly(db) }, oneDay * 3)
     const energyController = createEnergeController(db)
     const graphQlController = graphqlHTTP({
         schema,

@@ -11,6 +11,10 @@ const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 
 const args = argsParser(process.argv)
 
+const client = axios.create({
+    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36' }
+});
+
 function valuesToDates(res, dateFormat, extraDays = 0) {
     const values = {}
     for (let v of res.data.included) {
@@ -46,7 +50,7 @@ export async function ingestInstant(db) {
         const reqUrl = getDemandaUrl(date)
         console.log({reqUrl})
 
-        const res = await axios.get(reqUrl)
+        const res = await client.get(reqUrl)
         const data = parseJsonp('callback', res.data)
 
         let updatedRowsCount = 0
@@ -90,7 +94,7 @@ export async function ingestDaily(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl, axiosOptions)
+        const res = await client.get(reqUrl)
         const values = valuesToDates(res, 'yyyy-MM-dd')
         console.log(values)
 
@@ -113,7 +117,7 @@ export async function ingestHourly(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl, axiosOptions)
+        const res = await axios.get(reqUrl)
         const values = valuesToDates(res, 'yyyy-MM-HH')
         console.log(values)
 
@@ -134,7 +138,7 @@ export async function ingestMonthly(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl, axiosOptions)
+        const res = await axios.get(reqUrl)
         const values = valuesToDates(res, 'yyyy-MM')
         console.log(values)
 
@@ -150,13 +154,13 @@ export async function ingestMonthly(db) {
 }
 
 export async function ingestYearly(db) {
-    const startDate = '2016-01-01'//format(subDays(new Date(), 365*2), 'yyyy-MM-dd')
-    const endDate = '2020-12-31'//format(new Date(), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 365*4), 'yyyy-01-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl, axiosOptions)
+        const res = await axios.get(reqUrl)
         const values = valuesToDates(res, 'yyyy', 1)
         console.log(values)
 
