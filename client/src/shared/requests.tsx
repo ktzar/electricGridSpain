@@ -10,8 +10,8 @@ export async function fetchInstant() {
         solarpv,
         wind,
         solarthermal,
-        nuclear,
         hidro,
+        nuclear,
         inter,
         thermal,
         cogen,
@@ -29,8 +29,8 @@ export async function fetchDaily() {
         solarpv,
         wind,
         solarthermal,
-        nuclear,
         hidro,
+        nuclear,
         inter,
         thermal,
         cogen,
@@ -47,8 +47,8 @@ export async function fetchMonthly() {
         solarpv,
         wind,
         solarthermal,
-        nuclear,
         hidro,
+        nuclear,
         inter,
         thermal,
         cogen,
@@ -60,13 +60,13 @@ export async function fetchMonthly() {
 
 export async function fetchYearly() {
     const data = await request(endpoint, gql`{
-    latestYearly(count: 12) {
+    latestYearly(count: 15) {
         year,
         solarpv,
         wind,
         solarthermal,
-        nuclear,
         hidro,
+        nuclear,
         inter,
         thermal,
         cogen,

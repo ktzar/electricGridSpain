@@ -1,49 +1,85 @@
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { useQuery } from 'react-query'
-import { colours, EnergyType } from '../shared/colours'
+import { energyGroups, colours, EnergyType } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField } from '../shared/fields';
 import { fetchDaily, fetchMonthly, fetchInstant } from '../shared/requests';
 
+const capitaliseStr = (str : string) => str.charAt(0).toUpperCase() + str.slice(1) 
+
 const doughOptions = {
     responsive: true,
     plugins: {
+        tooltip: {
+            callbacks: {
+                label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW`
+                }
+            }
+        },
         legend: {
             display: false,
         },
         title: {
             display: true,
-            text: 'Produced GWh'
+            text: 'Average GW production'
         }
     }
 }
 
 type ListOfMeasurements = {name: EnergyType, value: number}[]
-
-const dataToDoughnut = (data : ListOfMeasurements) => ({
-    labels: data.map(k => k.name),
-    datasets: [
-        {
-            label: 'GWh',
-            data: data.map(k => k.value),
-            backgroundColor: data.map(k => colours[k.name]),
-        }
-    ]
-})
-
 type MeasurementSet = Record<string, number>
+
+const energyTypes = [
+    'solarpv',
+    'wind',
+    'solarthermal',
+    'hidro',
+    'nuclear',
+    'thermal',
+    'cogen',
+    'gas',
+    'carbon',
+]
+
+const groupByEnergyGroup = (data : ListOfMeasurements) => {
+    return Object.values(data.reduce((acc : Record<string, number>, item) => {
+        for (let group in energyGroups) {
+            if (energyGroups[group].labels.includes(item.name)) {
+                if (!acc[group]) acc[group] = 0
+                acc[group] += item.value
+                break
+            }
+        }
+        return acc
+    }, {}))
+}
+
 const accumulateMeasurements = (measList : MeasurementSet[]) => 
     measList.reduce((meas, acc) => {
         for (let key in meas) {
-            if (acc[key])
-                acc[key] += meas[key]
-            else
-                acc[key] = meas[key]
+            if (!acc[key]) acc[key] = 0
+            acc[key] += meas[key]
         }
         return acc
     }, {})
 
+
+const dataToDoughnut = (data : ListOfMeasurements) => ({
+    labels: data.map(k => k.name).concat(Object.keys(energyGroups)),
+    datasets: [
+        {
+            labels: data.map(k => k.name),
+            data: data.map(k => k.value),
+            backgroundColor: data.map(k => colours[k.name]),
+        },
+        {
+            labels: Object.keys(energyGroups),
+            data: groupByEnergyGroup(data),
+            backgroundColor: Object.values(energyGroups).map(v => v.colour)
+        }
+    ]
+})
 
 const createKeyRemover = (key : string) => (obj : Record<string, any>) => {
     const tmp = {...obj}
@@ -51,11 +87,14 @@ const createKeyRemover = (key : string) => (obj : Record<string, any>) => {
     return tmp
 }
 
-const prepareSeriesForDoughnut = (series : MeasurementSet[], timeField : string) => {
-    const recentValues = accumulateMeasurements(series.map(createKeyRemover(timeField)))
-    return dataToDoughnut(Object.keys(recentValues)
-        .map(key => ({name: key, value: recentValues[key]}))
-        .filter(val => val.value > 0))
+const prepareSeriesForDoughnut = (series : MeasurementSet[], timeField : string, scaleDown = 1) => {
+    const timeRemover = createKeyRemover(timeField)
+    const recentValues = accumulateMeasurements(series.map(timeRemover))
+    return dataToDoughnut(
+        energyTypes
+            .map(key => ({name: key, value: Math.round(recentValues[key] / scaleDown)}))
+            .filter(val => val.value > 0)
+    )
 }
 
 
@@ -74,9 +113,10 @@ export default () => {
 
     const last12MonthlyData = monthlyData.slice(monthlyData.length - 12)
 
-    const recentHoursData = prepareSeriesForDoughnut(latestData, 'time')
-    const recentDaysData = prepareSeriesForDoughnut(dailyData, 'day')
-    const recentMonthsData = prepareSeriesForDoughnut(last12MonthlyData, 'month')
+    const recentHoursData = prepareSeriesForDoughnut(latestData, 'time', latestData.length)
+    const recentDaysData = prepareSeriesForDoughnut(dailyData, 'day', dailyData.length * 24)
+    const recentMonthsData = prepareSeriesForDoughnut(last12MonthlyData, 'month', last12MonthlyData.length * 30 * 24)
+    console.log({recentMonthsData, recentDaysData, recentHoursData})
 
     return (
         <>

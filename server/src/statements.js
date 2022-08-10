@@ -7,7 +7,7 @@ export const select = {
     yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`
 }
 
-const commonCols = 'solarpv, wind, solarthermal, nuclear, hidro, cogen, gas, carbon'
+const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon'
 const updateOnConflict = 'update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
 
 export const ingest = {

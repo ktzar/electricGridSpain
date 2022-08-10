@@ -11,9 +11,9 @@ const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 
 const args = argsParser(process.argv)
 
-const client = axios.create({
+const axiosOptions = {
     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36' }
-});
+};
 
 function valuesToDates(res, dateFormat, extraDays = 0) {
     const values = {}
@@ -50,12 +50,13 @@ export async function ingestInstant(db) {
         const reqUrl = getDemandaUrl(date)
         console.log({reqUrl})
 
-        const res = await client.get(reqUrl)
+        const res = await axios.get(reqUrl, axiosOptions)
         const data = parseJsonp('callback', res.data)
+        console.log(res.data)
 
         let updatedRowsCount = 0
         for (let v of data.valoresHorariosGeneracion) {
-            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.nuc, v.hid, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
+            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
             if (res.lastId>0) {
                 updatedRowsCount++
             }
@@ -83,10 +84,6 @@ const readingMappings = {
     Cogeneration: 'cogen',
 }
 
-const axiosOptions = {
-     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36' }
-}
-
 export async function ingestDaily(db) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
@@ -94,13 +91,13 @@ export async function ingestDaily(db) {
     console.log({reqUrl})
 
     try {
-        const res = await client.get(reqUrl)
+        const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM-dd')
         console.log(values)
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
@@ -117,13 +114,13 @@ export async function ingestHourly(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl)
+        const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM-HH')
         console.log(values)
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.hourly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.hourly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
@@ -138,13 +135,13 @@ export async function ingestMonthly(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl)
+        const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM')
         console.log(values)
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 
@@ -160,13 +157,13 @@ export async function ingestYearly(db) {
     console.log({reqUrl})
 
     try {
-        const res = await axios.get(reqUrl)
+        const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy', 1)
         console.log(values)
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.nuclear, readings.hydro, readings.cogen, readings.gas, readings.coal])
+            const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
             console.log(res.lastID)
         }
     } catch(e) { 

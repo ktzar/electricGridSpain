@@ -24,6 +24,7 @@
     "graphql": "^16.5.0",
     "nodemon": "^2.0.19",
     "parse-jsonp": "^2.0.0",
+    "socks-proxy-agent": "^7.0.0",
     "sqlite": "^4.1.1",
     "sqlite3": "^5.0.6"
   }

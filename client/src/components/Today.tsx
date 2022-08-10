@@ -118,7 +118,7 @@ export default () => {
             </div>
             <div className="col">
                 <table className="table table-bordered">
-                    <thead style={{background: '#777', color: 'white'}}>
+                    <thead style={{background: '#aaf', color: 'white'}}>
                         <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
                     </thead>
                     <tbody>

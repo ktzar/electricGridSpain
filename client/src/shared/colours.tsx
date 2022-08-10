@@ -1,4 +1,5 @@
-export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'nuclear' , 'inter' , 'hidro' , 'thermal' , 'cogen' , 'gas' , 'carbon']
+export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'hidro', 'nuclear', 'thermal' , 'cogen' , 'gas' , 'carbon', 'cogen', 'inter']
+
 export type EnergyType = typeof energyTypes[number]
 
 export const acceptedColours = ['orange', 'blue' ,'red' ,'purple' ,'pink' ,'lightblue' ,'grey' ,'yellow' ,'teal' ,'brown']
@@ -15,5 +16,34 @@ export const colours : Record<EnergyType, Colour> = {
     cogen: 'yellow',
     gas: 'teal',
     carbon: 'brown'
+}
+
+type GroupConfig = {
+    label: string
+    labels: string[]
+    colour: string
+}
+
+export const energyGroups : Record<string, GroupConfig> = {
+    renewables: {
+        label: 'Renewables',
+        labels: ['solarpv', 'wind', 'hidro', 'solarthermal'],
+        colour: '#afa',
+    },
+    clean: {
+        label: 'Clean',
+        labels: ['nuclear', 'thermal'],
+        colour: '#aaf',
+    },
+    fossil: {
+        label: 'Fossil',
+        labels: ['carbon', 'gas', 'cogen'],
+        colour: '#faa',
+    },
+    other: {
+        label: 'Other',
+        labels: [],
+        colour: 'grey'
+    }
 }
 
