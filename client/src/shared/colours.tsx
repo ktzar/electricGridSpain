@@ -1,6 +1,4 @@
-export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'hidro', 'nuclear', 'thermal' , 'cogen' , 'gas' , 'carbon', 'cogen', 'inter']
-
-export type EnergyType = typeof energyTypes[number]
+import { EnergyType } from './types'
 
 export const acceptedColours = ['orange', 'blue' ,'red' ,'purple' ,'pink' ,'lightblue' ,'grey' ,'yellow' ,'teal' ,'brown']
 export type Colour = typeof acceptedColours[number]

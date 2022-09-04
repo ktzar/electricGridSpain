@@ -8,8 +8,8 @@ export async function fetchInstant() {
     latestInstant {
         time,
         solarpv,
-        wind,
         solarthermal,
+        wind,
         hidro,
         nuclear,
         inter,
@@ -27,8 +27,8 @@ export async function fetchDaily() {
     latestDaily(count: 30) {
         day,
         solarpv,
-        wind,
         solarthermal,
+        wind,
         hidro,
         nuclear,
         inter,
@@ -45,8 +45,8 @@ export async function fetchMonthly() {
     latestMonthly(count: 12) {
         month,
         solarpv,
-        wind,
         solarthermal,
+        wind,
         hidro,
         nuclear,
         inter,
@@ -63,8 +63,8 @@ export async function fetchYearly() {
     latestYearly(count: 15) {
         year,
         solarpv,
-        wind,
         solarthermal,
+        wind,
         hidro,
         nuclear,
         inter,

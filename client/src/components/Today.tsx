@@ -1,19 +1,39 @@
 import { useQuery } from 'react-query'
-import { Colour, EnergyType, colours } from '../shared/colours'
+import { Colour, energyGroups, colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { SourceIndicator } from './SourceIndicator';
 import { fetchInstant } from '../shared/requests';
+import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 
-const doughOptions = {
+const groupByEnergyGroup = (data : MeasurementSet) => {
+    const cleanData = Object.keys(data).map(a => ({name: a, value: data[a]}))
+    return Object.values(cleanData.reduce((acc : Record<string, number>, item) => {
+        for (let group in energyGroups) {
+            if (energyGroups[group].labels.includes(item.name)) {
+                if (!acc[group]) acc[group] = 0
+                acc[group] += item.value
+                break
+            }
+        }
+        return acc
+    }, {}))
+}
+
+const capitaliseStr = (str : string) => str.charAt(0).toUpperCase() + str.slice(1) 
+
+const doughnutOptions = {
     responsive: true,
     plugins: {
         legend: {
             display: false,
         },
-        tooltips: {
-            display: true,
-            enabled: true
+        tooltip: {
+            callbacks: {
+                label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW`
+                }
+            }
         },
         title: {
             display: true,
@@ -41,20 +61,29 @@ export default () => {
         return <div>Error loading data</div>
     }
 
-
     const clearLabels : EnergyType[] = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
 
     const seriesData = !isLoading
         ? clearLabels.map(k => ({ name: k, value: latestData[k]}))
         : []
 
-    const doughData = {
-        labels: Object.keys(latestData).filter(k => k !== 'time'),
+    const labels = Object.keys(latestData).filter(k => k !== 'time')
+
+    const doughnutData = {
+        labels,
         datasets: [
             {
                 label: 'GW',
+                labels,
                 data: clearLabels.map(k => latestData[k]),
                 backgroundColor: clearLabels.map(energy => colours[energy])
+            },
+            {
+                labels: Object.keys(energyGroups),
+                data: groupByEnergyGroup(latestData),
+                cutout: 0,
+                radius: '150%',
+                backgroundColor: Object.values(energyGroups).map(v => v.colour)
             }
         ],
     }
@@ -66,7 +95,7 @@ export default () => {
 
     const toPerc = (val : number) => Math.round( 100 * val / all).toString() + '%'
 
-    console.log({doughData, latestData})
+    console.log({doughnutData, latestData})
 
     return (
         <>
@@ -91,7 +120,7 @@ export default () => {
                 <div className="card">
                   <div className="card-header"> {formatAmount(parseFloat((all / 1000).toFixed(2)))} GW demand </div>
                   <div className="card-body">
-                        <Doughnut options={doughOptions} data={doughData} />
+                        <Doughnut options={doughnutOptions} data={doughnutData} />
                   </div>
                 </div>
             </div>

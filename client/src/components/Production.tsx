@@ -1,4 +1,5 @@
-import { Colour, colours, EnergyType } from '../shared/colours'
+import { Colour, colours } from '../shared/colours'
+import { EnergyType } from '../shared/types'
 import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
 import { queryOptions } from '../shared/queryOptions';

@@ -129,7 +129,7 @@ export async function ingestHourly(db) {
 }
 
 export async function ingestMonthly(db) {
-    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
+    const startDate = format(subDays(new Date(), 30*23), 'yyyy-MM-01')
     const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
     console.log({reqUrl})

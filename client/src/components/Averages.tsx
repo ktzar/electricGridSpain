@@ -1,9 +1,10 @@
 import { useQuery } from 'react-query'
-import { energyGroups, colours, EnergyType } from '../shared/colours'
+import { energyGroups, colours } from '../shared/colours'
 import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField } from '../shared/fields';
 import { fetchDaily, fetchMonthly, fetchInstant } from '../shared/requests';
+import { MeasurementSet, ListOfMeasurements, EnergyType } from '../shared/types';
 
 const capitaliseStr = (str : string) => str.charAt(0).toUpperCase() + str.slice(1) 
 
@@ -27,13 +28,11 @@ const doughOptions = {
     }
 }
 
-type ListOfMeasurements = {name: EnergyType, value: number}[]
-type MeasurementSet = Record<string, number>
 
 const energyTypes = [
     'solarpv',
-    'wind',
     'solarthermal',
+    'wind',
     'hidro',
     'nuclear',
     'thermal',
@@ -75,6 +74,8 @@ const dataToDoughnut = (data : ListOfMeasurements) => ({
         },
         {
             labels: Object.keys(energyGroups),
+            cutout: 0,
+            radius: '150%',
             data: groupByEnergyGroup(data),
             backgroundColor: Object.values(energyGroups).map(v => v.colour)
         }

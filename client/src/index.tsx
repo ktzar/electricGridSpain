@@ -24,6 +24,7 @@ const App = () => {
             <Production/>
             <div className="text-center m-t-5">by <a href="https://github.com/ktzar">ktz</a></div>
             <div className="text-center m-t-5">data from <a href="https://www.ree.es/en/apidatos">Red Eléctrica de España</a></div>
+            <div className="text-center m-t-5">inspired by <a href="https://grid.iamkate.com/">Kate Rose Morley</a></div>
         </div>
       </QueryClientProvider>
     </>);

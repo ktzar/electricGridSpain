@@ -1,4 +1,5 @@
-import { colours, EnergyType } from '../shared/colours'
+import { colours } from '../shared/colours'
+import { EnergyType } from '../shared/types'
 
 interface SourceIndicatorProps {
     type: EnergyType
