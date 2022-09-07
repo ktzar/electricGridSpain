@@ -7,7 +7,9 @@ import { fetchInstant } from '../shared/requests';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 
 const groupByEnergyGroup = (data : MeasurementSet) => {
-    const cleanData = Object.keys(data).map(a => ({name: a, value: data[a]}))
+    const cleanData = Object.keys(data)
+        .filter(a => data[a] > 0)
+        .map(a => ({name: a, value: data[a]}))
     return Object.values(cleanData.reduce((acc : Record<string, number>, item) => {
         for (let group in energyGroups) {
             if (energyGroups[group].labels.includes(item.name)) {

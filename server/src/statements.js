@@ -11,11 +11,10 @@ const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, car
 const updateOnConflict = 'update set solarpv=excluded.solarpv, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
 
 export const ingest = {
-        instant: 'insert into instant (time, ' + commonCols + ', inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?) on conflict(time) do ' + updateOnConflict
-  + ', inter=excluded.inter, thermal=excluded.thermal;',
+        instant: 'insert or replace into instant (time, ' + commonCols + ', inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?);',
         daily: 'insert into daily (day, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?) on conflict(day) do ' + updateOnConflict + ';',
-        monthly: 'insert into monthly (month, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?) on conflict(month) do ' + updateOnConflict + ';',
-        year: 'insert into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?) on conflict(year) do ' + updateOnConflict + ';'
+        monthly: 'insert or replace into monthly (month, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
+        year: 'insert or replace into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);'
 }
 
 /**

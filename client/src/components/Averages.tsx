@@ -127,20 +127,20 @@ export default () => {
           </div>
           <div className="card-body">
             <div className="row">
-                <div className="col-sm">
-                    <h4>Last {latestData.length / 6} hours</h4>
+                <div className="col-sm-4">
+                    <h5>Last {latestData.length / 6} hours</h5>
                     <Doughnut
                         options={doughOptions}
                         data={recentHoursData}/>
                 </div>
-                <div className="col-sm">
-                    <h4>Last {dailyData.length} days</h4>
+                <div className="col-sm-4">
+                    <h5>Last {dailyData.length} days</h5>
                     <Doughnut
                         options={doughOptions}
                         data={recentDaysData}/>
                 </div>
-                <div className="col-sm">
-                    <h4>Last {last12MonthlyData.length} months</h4>
+                <div className="col-sm-4">
+                    <h5>Last {last12MonthlyData.length} months</h5>
                     <Doughnut
                         options={doughOptions}
                         data={recentMonthsData}/>

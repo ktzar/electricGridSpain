@@ -19,6 +19,7 @@ const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 const oneMinute = 1000 * 60
 const oneHour = oneMinute * 60
 const oneDay = oneHour * 24
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -49,6 +50,7 @@ open({
 }).then(adb => {
     const db = adb
     ingestInstant(db)
+
     setInterval(() => { ingestInstant(db) }, oneMinute * 30)
     setInterval(() => { ingestDaily(db) }, oneHour * 12)
     setInterval(() => { ingestYearly(db); ingestMonthly(db) }, oneDay * 3)
@@ -62,6 +64,12 @@ open({
     app.use('/graphql', graphQlController)
     app.use('/api/graphql', graphQlController)
     app.use('/api/', energyController)
+    app.get('/ingest', async (req, res) => {
+        const yearlyValues = await ingestYearly(db)
+        const monthlyValues = await ingestMonthly(db)
+        const dailyValues = await ingestDaily(db)
+        res.send({yearlyValues, monthlyValues, dailyValues})
+    })
     app.use('/', energyController)
     app.use(express.static(PUBLIC_PATH))
     app.listen(PORT, () => {
