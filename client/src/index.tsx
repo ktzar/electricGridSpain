@@ -30,4 +30,10 @@ const App = () => {
     </>);
 }
 
-ReactDom.render(<App/>, document.getElementById('root'));
+const version = document.getElementById('root');
+if (version) {
+    version.innerHTML = 'version ' + __APP_VERSION__
+}
+const root = document.getElementById('root');
+if (root) root.innerHTML = 'Loading...';
+ReactDom.render(<App/>, root);
