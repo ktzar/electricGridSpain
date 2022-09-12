@@ -6,6 +6,7 @@ dotenv.config()
 import {open} from 'sqlite'
 import parseJsonp from 'parse-jsonp'
 import axios from 'axios'
+import logger from './logger.js'
 import { ingest } from './statements.js'
 const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 
@@ -20,12 +21,12 @@ function valuesToDates(res, dateFormat, extraDays = 0) {
     for (let v of res.data.included) {
         const readingType = readingMappings[v.type]
         if (!readingType) {
-            console.log('Unknown type ' + v.type)
+            logger.info('Unknown type ' + v.type)
             continue;
         }
         for (let reading of v.attributes.values) {
             const readingDate = format(addDays(parseISO(reading.datetime), extraDays), dateFormat)
-            console.log({readingDate})
+            logger.info({readingDate})
             if (!values[readingDate]) {
                 values[readingDate] = {}
             }
@@ -44,15 +45,16 @@ const getGeneracionUrl = (startDate, endDate, trunc) =>
 const getDemandaUrl = date =>
     'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha={date}'
         .replace('{date}', date)
+
 export async function ingestInstant(db) {
     try {
         const date = format(new Date(), 'yyyy-MM-dd')
         const reqUrl = getDemandaUrl(date)
-        console.log({reqUrl})
+        logger.info(`Requesting ${reqUrl}`)
 
         const res = await axios.get(reqUrl, axiosOptions)
         const data = parseJsonp('callback', res.data)
-        console.log(res.data)
+        logger.info(`Number of values ingested ${data.valoresHorariosGeneracion.length}`)
 
         let updatedRowsCount = 0
         for (let v of data.valoresHorariosGeneracion) {
@@ -61,11 +63,11 @@ export async function ingestInstant(db) {
                 updatedRowsCount++
             }
         }
-        console.log(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
+        logger.info(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
     } catch (e) {
 
-        console.error(`Error when updating instant data ${e}`)
-        console.error(e.stack)
+        logger.error(`Error when updating instant data ${e}`)
+        logger.error(e.stack)
     }
 }
 
@@ -88,21 +90,23 @@ export async function ingestDaily(db) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
-    console.log({reqUrl})
+    logger.info(`Ingesting daily on ${reqUrl}`)
 
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM-dd')
-        console.log(values)
+        logger.info(`Values received have a length of ${values}`)
 
         for (const date in values) {
             const readings = values[date]
             const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            console.log(res.lastID)
+            logger.info(`last id of values inserted ${res.lastID}`)
         }
+        return values
     } catch(e) { 
-        console.error(`Error updating daily data ${e}`)
-        console.error(e.stack)
+        logger.error(`Error updating daily data ${e}`)
+        logger.error(e.stack)
+        return { error: true, message: `${e}` }
     }
 }
 
@@ -111,20 +115,23 @@ export async function ingestHourly(db) {
     const startDate = format(subDays(new Date(), 5), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'hour')
-    console.log({reqUrl})
+    logger.info(`Ingesting hourly from ${reqUrl}`)
 
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM-HH')
-        console.log(values)
+        logger.info(`Values received have a length of ${values}`)
 
         for (const date in values) {
             const readings = values[date]
             const res = await db.run(ingest.hourly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            console.log(res.lastID)
+            logger.info(`last id of values inserted ${res.lastID}`)
         }
+        return values
     } catch(e) { 
-        console.error(`Error updating monthly data ${e}`)
+        const message = `Error updating monthly data ${e}`
+        logger.error(message)
+        return { error: true, message }
     }
 }
 
@@ -132,21 +139,25 @@ export async function ingestMonthly(db) {
     const startDate = format(subDays(new Date(), 30*23), 'yyyy-MM-01')
     const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
-    console.log({reqUrl})
+    logger.info(`Ingesting monthly from ${reqUrl}`)
 
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const values = valuesToDates(res, 'yyyy-MM')
-        console.log(values)
+        const values = valuesToDates(res, 'yyyy-MM', 1)
+        logger.info(values)
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.monthly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            console.log(res.lastID)
+            const columnValues = [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal]
+            logger.info("Running", ingest.monthly, "with", columnValues)
+            const res = await db.run(ingest.monthly, columnValues)
+            logger.info(res.lastID)
         }
+        return values
     } catch(e) { 
-        console.error(`Error updating monthly data ${e}`)
-        console.error(e)
+        const message =`Error updating monthly data ${e}`
+        logger.error(message)
+        return { error: true, message }
     }
 }
 
@@ -154,20 +165,22 @@ export async function ingestYearly(db) {
     const startDate = format(subDays(new Date(), 365*4), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
-    console.log({reqUrl})
+    logger.info(`Ingesting yearly from ${reqUrl}`)
 
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy', 1)
-        console.log(values)
+        logger.info(values)
 
         for (const date in values) {
             const readings = values[date]
             const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            console.log(res.lastID)
+            logger.info(res.lastID)
         }
     } catch(e) { 
-        console.error(`Error updating yearly data ${e}`)
+        const message = `Error updating yearly data ${e}`
+        logger.error(message)
+        return { error: true, message }
     }
 }
 
@@ -182,27 +195,27 @@ open({
             await ingestDaily(db)
             await ingestMonthly(db)
             await ingestYearly(db)
-            console.log('All ingested')
+            logger.info('All ingested')
         }else if (args.data === 'instant') {
             await ingestInstant(db)
-            console.log('Instant ingested')
+            logger.info('Instant ingested')
         } else if(args.data === 'daily') {
             await ingestDaily(db)
-            console.log('Daily ingested')
+            logger.info('Daily ingested')
         } else if(args.data === 'hourly') {
             await ingestHourly(db)
-            console.log('Hourly ingested')
+            logger.info('Hourly ingested')
         } else if(args.data === 'monthly') {
             await ingestMonthly(db)
-            console.log('Monthly ingested')
+            logger.info('Monthly ingested')
         } else if(args.data === 'yearly') {
             await ingestYearly(db)
-            console.log('Yearly ingested')
+            logger.info('Yearly ingested')
         } else {
-            console.log(args.data, 'not recognised')
+            logger.info(`${args.data} data type not recognised`)
         }
     } catch(e) {
-        console.log(e.response || e)
+        logger.info(e.response || e)
     }
     
 })

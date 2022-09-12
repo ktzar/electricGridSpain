@@ -5,6 +5,7 @@ import path from 'path'
 import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
+import logger from './logger.js'
 import { select } from './statements.js'
 import { graphqlHTTP } from 'express-graphql'
 import { buildSchema } from 'graphql'
@@ -73,7 +74,7 @@ open({
     app.use('/', energyController)
     app.use(express.static(PUBLIC_PATH))
     app.listen(PORT, () => {
-        console.log('Server started on port ' + PORT)
+        logger.info('Server started on port ' + PORT)
     })
 })
 
