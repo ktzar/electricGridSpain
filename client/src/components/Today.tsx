@@ -4,6 +4,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { SourceIndicator } from './SourceIndicator';
 import { fetchInstant } from '../shared/requests';
+import formatAmount from '../shared/formatAmount';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 
 const groupByEnergyGroup = (data : MeasurementSet) => {
@@ -24,7 +25,7 @@ const groupByEnergyGroup = (data : MeasurementSet) => {
 
 const capitaliseStr = (str : string) => str.charAt(0).toUpperCase() + str.slice(1) 
 
-const doughnutOptions = {
+const doughnutOptions = (title = '') => ({
     responsive: true,
     plugins: {
         legend: {
@@ -40,13 +41,11 @@ const doughnutOptions = {
         },
         title: {
             display: true,
-            text: 'Instant GW per source'
+            text: `Instant production ${title}GW`
         }
     }
-}
+})
 
-const formatter = Intl.NumberFormat('en-GB')
-const formatAmount = (nmb : number) => formatter.format(nmb)
 const sumObjectValues = (data : Record<string, number>) => {
     let all = 0
     for (let key in data) {
@@ -97,14 +96,12 @@ export default () => {
             },
             { 
                 labels: ['Exported', 'Produced for national consumption'],
-                data: [-latestData.inter, all - latestData.inter],
+                data: [-latestData.inter, all],
                 radius: '150%',
                 backgroundColor: ['pink', 'white']
             }
         ],
     }
-
-    console.log({doughnutData, latestData})
 
     return (
         <>
@@ -127,9 +124,9 @@ export default () => {
         <div className="row mt-2">
             <div className="col">
                 <div className="card">
-                  <div className="card-header"> {formatAmount(parseFloat((all / 1000).toFixed(2)))} GW demand </div>
+                  <div className="card-header">Instant generation per source</div>
                   <div className="card-body">
-                        <Doughnut options={doughnutOptions} data={doughnutData} />
+                        <Doughnut options={doughnutOptions(formatAmount(parseFloat((all / 1000).toFixed(2))))} data={doughnutData} />
                   </div>
                 </div>
             </div>

@@ -4,11 +4,12 @@ import { Doughnut } from 'react-chartjs-2';
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField } from '../shared/fields';
 import { fetchDaily, fetchMonthly, fetchInstant } from '../shared/requests';
+import formatAmount from '../shared/formatAmount';
 import { MeasurementSet, ListOfMeasurements, EnergyType } from '../shared/types';
 
 const capitaliseStr = (str : string) => str.charAt(0).toUpperCase() + str.slice(1) 
 
-const doughOptions = {
+const doughOptions = (title = '') => ({
     responsive: true,
     plugins: {
         tooltip: {
@@ -24,10 +25,10 @@ const doughOptions = {
         },
         title: {
             display: true,
-            text: 'Average GW production'
+            text: `Average GW production ${title}`
         }
     }
-}
+})
 
 
 const energyTypes = [
@@ -71,12 +72,14 @@ const dataToDoughnut = (data : ListOfMeasurements) => ({
         {
             labels: data.map(k => k.name),
             data: data.map(k => k.value),
+            radius: '100%',
+            cutout: 70,
             backgroundColor: data.map(k => colours[k.name]),
         },
         {
             labels: Object.keys(energyGroups),
-            cutout: 0,
-            radius: '150%',
+            cutout: 45,
+            radius: '130%',
             data: groupByEnergyGroup(data),
             backgroundColor: Object.values(energyGroups).map(v => v.colour)
         }
@@ -118,7 +121,10 @@ export default () => {
     const recentHoursData = prepareSeriesForDoughnut(latestData, 'time', latestData.length)
     const recentDaysData = prepareSeriesForDoughnut(dailyData, 'day', dailyData.length * 24)
     const recentMonthsData = prepareSeriesForDoughnut(last12MonthlyData, 'month', last12MonthlyData.length * 30 * 24)
-    console.log({recentMonthsData, recentDaysData, recentHoursData})
+
+    const averageHoursProduction = recentHoursData.datasets[0].data.reduce((a, b) => a+b, 0)
+    const averageDaysProduction = recentDaysData.datasets[0].data.reduce((a, b) => a+b, 0)
+    const averageMonthsProduction = recentMonthsData.datasets[0].data.reduce((a, b) => a+b, 0)
 
     return (
         <>
@@ -131,19 +137,19 @@ export default () => {
                 <div className="col-sm-4">
                     <h5>Last {latestData.length / 6} hours</h5>
                     <Doughnut
-                        options={doughOptions}
+                        options={doughOptions(`${formatAmount(averageHoursProduction)} GW`)}
                         data={recentHoursData}/>
                 </div>
                 <div className="col-sm-4">
                     <h5>Last {dailyData.length} days</h5>
                     <Doughnut
-                        options={doughOptions}
+                        options={doughOptions(`${formatAmount(averageDaysProduction)} GW`)}
                         data={recentDaysData}/>
                 </div>
                 <div className="col-sm-4">
                     <h5>Last {last12MonthlyData.length} months</h5>
                     <Doughnut
-                        options={doughOptions}
+                        options={doughOptions(`${formatAmount(averageMonthsProduction)} GW`)}
                         data={recentMonthsData}/>
                 </div>
             </div>
