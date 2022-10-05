@@ -33,7 +33,8 @@ const doughnutOptions = {
         tooltip: {
             callbacks: {
                 label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
-                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW`
+                    const perc = dataset.data[dataIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW (${perc.toFixed(2)}%)`
                 }
             }
         },
@@ -71,6 +72,12 @@ export default () => {
 
     const labels = Object.keys(latestData).filter(k => k !== 'time')
 
+    const all = sumObjectValues(latestData)
+    const renewables = latestData.solarpv + latestData.solarthermal + latestData.wind + latestData.hidro
+    const clean = latestData.nuclear
+    const fossil = latestData.gas + latestData.cogen + latestData.carbon
+    const toPerc = (val : number) => Math.round( 100 * val / all).toString() + '%'
+
     const doughnutData = {
         labels,
         datasets: [
@@ -78,24 +85,24 @@ export default () => {
                 label: 'GW',
                 labels,
                 data: clearLabels.map(k => latestData[k]),
+                radius: '90%',
                 backgroundColor: clearLabels.map(energy => colours[energy])
             },
             {
                 labels: Object.keys(energyGroups),
                 data: groupByEnergyGroup(latestData),
                 cutout: 0,
-                radius: '150%',
+                radius: '130%',
                 backgroundColor: Object.values(energyGroups).map(v => v.colour)
+            },
+            { 
+                labels: ['Exported', 'Produced for national consumption'],
+                data: [-latestData.inter, all - latestData.inter],
+                radius: '150%',
+                backgroundColor: ['pink', 'white']
             }
         ],
     }
-
-    const all = sumObjectValues(latestData)
-    const renewables = latestData.solarpv + latestData.solarthermal + latestData.wind + latestData.hidro
-    const clean = latestData.nuclear
-    const fossil = latestData.gas + latestData.cogen + latestData.carbon
-
-    const toPerc = (val : number) => Math.round( 100 * val / all).toString() + '%'
 
     console.log({doughnutData, latestData})
 

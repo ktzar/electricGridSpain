@@ -14,7 +14,8 @@ const doughOptions = {
         tooltip: {
             callbacks: {
                 label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
-                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW`
+                    const perc = dataset.data[datasetIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW (${perc.toFixed(2)}%)`
                 }
             }
         },
