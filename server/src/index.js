@@ -53,8 +53,7 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-    ingestInstant(db)
-
+    //ingestInstant(db)
     setInterval(() => { ingestInstant(db) }, oneMinute * 30)
     setInterval(() => { ingestDaily(db) }, oneHour * 12)
     setInterval(() => { ingestYearly(db); ingestMonthly(db) }, oneDay * 3)

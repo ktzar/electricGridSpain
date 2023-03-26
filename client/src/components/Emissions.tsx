@@ -47,25 +47,27 @@ export const Emissions = () => {
         ]
     }
 
+    const unit = 'gCO2/kWh'
+
     return <>
         <div className="card mt-2">
             <div className="card-header">
-                <h2>Emissions</h2>
+                How many grams of CO2 is sent to the atmosphere to produce a kWh of electricity.
             </div>
             <div className="card-body">
                 <div className="row">
                     <div className="col-sm-4">
-                        <h5>Emissions in the last 30 days</h5>
-                        <Line options={chartOptions({title: 'Emissions in the last 30 days'})} data={dailyData}/>
+                        <h5>Emissions in the last {dailyEmissions.length} days</h5>
+                        <Line options={chartOptions({title: `Emissions in the last ${dailyEmissions.length} days`, unit})} data={dailyData}/>
 
                     </div>
                     <div className="col-sm-4">
-                        <h5>Emissions in the last 12 months</h5>
-                        <Line options={chartOptions({title: 'Emissions in the last 12 months'})} data={monthlyData}/>
+                        <h5>Emissions in the last {monthlyEmissions.length} months</h5>
+                        <Line options={chartOptions({title: `Emissions in the last ${monthlyEmissions.length} months`, unit})} data={monthlyData}/>
                     </div>
                     <div className="col-sm-4">
-                        <h5>Emissions in the last 10 years</h5>
-                        <Line options={chartOptions({title: 'Emissions in the last 10 years'})} data={yearlyData}/>
+                        <h5>Emissions in the last { yearlyEmissions.length } years</h5>
+                        <Line options={chartOptions({title: `Emissions in the last ${yearlyEmissions.length} years`, unit})} data={yearlyData}/>
                     </div>
                 </div>
             </div>
