@@ -42,6 +42,12 @@ const getGeneracionUrl = (startDate, endDate, trunc) =>
         .replace('{endDate}', endDate)
         .replace('{trunc}', trunc)
 
+const getEmisionesUrl = (startDate, endDate, trunc) =>
+    'https://apidatos.ree.es/en/datos/generacion/no-renovables-detalle-emisiones-CO2?start_date={startDate}&end_date={endDate}&time_trunc={trunc}'
+        .replace('{startDate}', startDate)
+        .replace('{endDate}', endDate)
+        .replace('{trunc}', trunc)
+
 const getDemandaUrl = date =>
     'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha={date}'
         .replace('{date}', date)
@@ -86,6 +92,48 @@ const readingMappings = {
     Cogeneration: 'cogen',
 }
 
+export async function ingestDailyEmissions(db) {
+    const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
+    const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
+    ingestEmissionsForType(db, startDate, endDate, 'day', 10, ingest.dailyEmissions)
+}
+
+export async function ingestMonthlyEmissions(db) {
+    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
+    ingestEmissionsForType(db, startDate, endDate, 'month', 7, ingest.monthlyEmissions)
+}
+
+export async function ingestYearlyEmissions(db) {
+    const startDate = format(subDays(new Date(), 365*16), 'yyyy-01-01')
+    const endDate = format(subDays(new Date(), 365*12), 'yyyy-12-31')
+    //const endDate = format(new Date(), 'yyyy-MM-dd')
+    ingestEmissionsForType(db, startDate, endDate, 'year', 4, ingest.yearlyEmissions)
+}
+
+async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLength, sqlStatement) {
+    const reqUrl = getEmisionesUrl(startDate, endDate, type)
+    console.log(reqUrl)
+    try {
+        const res = await axios.get(reqUrl, axiosOptions)
+        const filteredRes = res.data.included.filter(d => d.type === 'tCO2 eq./MWh')
+        if (filteredRes.length > 0) {
+            const emissions = filteredRes[0]
+            for (const value of emissions.attributes.values) {
+                // get first X characters of date
+                const dayDate = value.datetime.substring(0, dateTruncLength)
+                //convert from tons per MWh to grams per kWh
+                const emissions = parseFloat((value.value * 1000).toFixed(2))
+                const res = await db.run(sqlStatement, [dayDate, emissions])
+                logger.info(`Updated ${type} emissions for ${dayDate} with value ${emissions}`)
+            }
+        }
+    } catch(e) {
+        logger.error(`Error updating daily emissions ${e}`)
+        logger.error(e.stack)
+    }
+}
+
 export async function ingestDaily(db) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
@@ -100,7 +148,7 @@ export async function ingestDaily(db) {
         for (const date in values) {
             const readings = values[date]
             const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            logger.info(`last id of values inserted ${res.lastID}`)
+            logger.info(`last id of values inserted for day ${date}: ${res.lastID}`)
         }
         return values
     } catch(e) { 
@@ -199,6 +247,15 @@ open({
         }else if (args.data === 'instant') {
             await ingestInstant(db)
             logger.info('Instant ingested')
+        } else if(args.data === 'dailyEmissions') {
+            await ingestDailyEmissions(db)
+            logger.info('Daily emissions ingested')
+        } else if(args.data === 'monthlyEmissions') {
+            await ingestMonthlyEmissions(db)
+            logger.info('Monthly emissions ingested')
+        } else if(args.data === 'yearlyEmissions') {
+            await ingestYearlyEmissions(db)
+            logger.info('Yearly ingested')
         } else if(args.data === 'daily') {
             await ingestDaily(db)
             logger.info('Daily ingested')

@@ -2,6 +2,7 @@
 export const select = {
     instantLast: 'select * from instant order by time desc limit 0,1',
     instantLatest: 'select * from instant order by time desc limit 0,144',
+    instantLatestByDay: day => `select * from instant where time like '${day}%' order by time desc limit 0,144`,
     dailyLatest: count => `select * from daily order by day desc limit 0,${count}`,
     monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
     yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`
@@ -14,7 +15,10 @@ export const ingest = {
         instant: 'insert or replace into instant (time, ' + commonCols + ', inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?);',
         daily: 'insert into daily (day, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?) on conflict(day) do ' + updateOnConflict + ';',
         monthly: 'insert or replace into monthly (month, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
-        year: 'insert or replace into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);'
+        year: 'insert or replace into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
+        dailyEmissions: 'insert into daily (day, emissions) values(?,?) on conflict(day) do update set emissions=excluded.emissions;',
+        monthlyEmissions: 'insert into monthly (month, emissions) values(?,?) on conflict(month) do update set emissions=excluded.emissions;',
+        yearlyEmissions: 'insert into yearly (year, emissions) values(?,?) on conflict(year) do update set emissions=excluded.emissions;'
 }
 
 /**

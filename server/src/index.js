@@ -31,6 +31,9 @@ const root = db => ({
         const row = await db.get(select.instantLast)
         return row;
     },
+    latestInstantByDay: async ({day}) => {
+        return await db.all(select.instantLatestByDay(day))
+    },
     latestDaily: async ({count = 30}) => {
         const row = await db.all(select.dailyLatest(count))
         return row.reverse()

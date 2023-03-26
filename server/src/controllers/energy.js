@@ -10,6 +10,11 @@ export const createEnergeController = db => {
     })
 
     energy.get('/latest', async (req, res) => {
+        if (req.query.date) {
+            const row = await db.get(select.instantLatestByDay(req.query.date))
+            res.send(row)
+            return
+        }
         const row = await db.all(select.instantLatest)
         res.send(row.reverse())
     })

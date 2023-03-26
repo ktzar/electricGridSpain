@@ -37,6 +37,7 @@ type Day implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    emissions: Float,
 }
 
 type Month implements Measurement {
@@ -51,6 +52,7 @@ type Month implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    emissions: Float
 }
 
 type Year implements Measurement {
@@ -65,10 +67,12 @@ type Year implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    emissions: Float,
 }
 
  type Query {
      latestInstant: Instant,
+     latestInstantByDay(day: String): [Instant],
      latestDaily(count: Int): [Day],
      latestMonthly(count: Int): [Month],
      latestYearly(count: Int): [Year]
