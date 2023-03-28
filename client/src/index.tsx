@@ -21,8 +21,10 @@ const App = () => {
             <hr/>
             <h2>Averages</h2>
             <Averages/>
+            <hr/>
             <h2>Production</h2>
             <Production/>
+            <hr/>
             <h2>Emissions</h2>
             <Emissions/>
             <hr/>

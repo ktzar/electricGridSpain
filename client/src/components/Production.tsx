@@ -8,6 +8,38 @@ import { fetchDaily, fetchInstantByDay, fetchMonthly, fetchYearly } from '../sha
 import { useState } from 'react';
 import { chartOptions } from '../shared/chartOptions';
 
+const getScaleFromData = (data1, data2) => {
+    let maxValue = -99999
+    let minValue = 99999
+    for (let i = 0; i < data1.length; i++) {
+        const d = data1[i]
+        const keys = Object.keys(d)
+        for (let j = 0; j < keys.length; j++) {
+            const k = parseInt(d[keys[j]])
+            if (k > maxValue) {
+                maxValue = k
+            }
+            if (k < minValue) {
+                minValue = k
+            }
+        }
+    }
+    for (let i = 0; i < data2.length; i++) {
+        const d = data2[i]
+        const keys = Object.keys(d)
+        for (let j = 0; j < keys.length; j++) {
+            const k = parseInt(keys[j])
+            if (k > maxValue) {
+                maxValue = k
+            }
+            if (k < minValue) {
+                minValue = k
+            }
+        }
+    }
+
+    return [ minValue, maxValue ]
+}
 
 const labelToDataset = (data : Record<string, any>, scaleDown = 1) => (label : EnergyType) => (
     {
@@ -23,6 +55,7 @@ export default () => {
     //today date in format yyyy-mm-dd
     const today = new Date().toISOString().slice(0, 10);
     const [instantDay, setInstantDay] = useState<string>('')
+    const [instantDayInput, setInstantDayInput] = useState<string>('')
 
     const { isLoading: isLoadingInstantDate, data: latestDataByDay } = useQuery('latestDataByDay' + instantDay, () => {
         if (instantDay === '') return Promise.resolve([])
@@ -45,6 +78,7 @@ export default () => {
     }
 
     const clearLabels = Object.keys(latestData[0]).filter(k => k !== 'time')
+    const [minValue, maxValue] = getScaleFromData(latestData, latestDataByDay)
 
     return (
         <>
@@ -56,24 +90,30 @@ export default () => {
             <div className="row">
                 <div className="col-sm-6">
                     <h5 className="text-center">Last {Math.round(latestData.length / 6).toString()} hours</h5>
-                    <Line options={chartOptions({title: 'Instant production'})} data={{
+                    <Line options={chartOptions({title: 'Instant production', max: maxValue, min: minValue})} data={{
                         labels: latestData.map((k : FieldEntity) => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))
                     }}/>
                 </div>
-                <div className="col-sm-6">
+                <div className="col-sm-6 text-center">
                     <h5>{instantDay === '' ? 'Production for a given day' : instantDay}</h5>
                     {instantDay !== '' && (
-                        <Line options={chartOptions({title: `Instant production for ${instantDay}`})} data={{
+                        <Line options={chartOptions({title: `Instant production for ${instantDay}`, max: maxValue, min: minValue})} data={{
                             labels: latestDataByDay.map((k : FieldEntity) => k.time),
                             datasets: clearLabels.map(labelToDataset(latestDataByDay))
                         }}/>
                     )}
+                    {(latestDataByDay.length === 0 && instantDay !== '') && <div className="badge badge-pill badge-danger">No data for this day</div>}
                     <h6>Choose another date</h6>
                     <input type="date" id="start" name="trip-start"
-                        onChange={val => setInstantDay(val.target.value)}
-                        value={instantDay}
+                        onChange={val => setInstantDayInput(val.target.value)}
+                        value={instantDayInput}
                         min="2015-01-01" max={today}></input>
+                    <button
+                        className="btn btn-small btn-primary"
+                        style={{margin: '0.5em', padding: '0.25em 0.5em'}}
+                        onClick={() => setInstantDay(instantDayInput)}>
+                            Load</button>
 
                 </div>
             </div>

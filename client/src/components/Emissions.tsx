@@ -15,6 +15,7 @@ const dataToDataset = (data : EmissionRecord[])  => ({
         tension: 0.3,
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgba(200, 100, 0, 1)',
+        borderWidth: 1.5
     })
 
 
@@ -58,16 +59,16 @@ export const Emissions = () => {
                 <div className="row">
                     <div className="col-sm-4">
                         <h5>Emissions in the last {dailyEmissions.length} days</h5>
-                        <Line options={chartOptions({title: `Emissions in the last ${dailyEmissions.length} days`, unit})} data={dailyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={dailyData}/>
 
                     </div>
                     <div className="col-sm-4">
                         <h5>Emissions in the last {monthlyEmissions.length} months</h5>
-                        <Line options={chartOptions({title: `Emissions in the last ${monthlyEmissions.length} months`, unit})} data={monthlyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={monthlyData}/>
                     </div>
                     <div className="col-sm-4">
                         <h5>Emissions in the last { yearlyEmissions.length } years</h5>
-                        <Line options={chartOptions({title: `Emissions in the last ${yearlyEmissions.length} years`, unit})} data={yearlyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={yearlyData}/>
                     </div>
                 </div>
             </div>

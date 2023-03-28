@@ -93,7 +93,7 @@ const readingMappings = {
 }
 
 export async function ingestDailyEmissions(db) {
-    const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 90), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'day', 10, ingest.dailyEmissions)
 }
@@ -119,6 +119,10 @@ async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLen
         const filteredRes = res.data.included.filter(d => d.type === 'tCO2 eq./MWh')
         if (filteredRes.length > 0) {
             const emissions = filteredRes[0]
+            if (type === 'day') {
+                // remove last item of values array, as it is the current day and it comes with errors
+                emissions.attributes.values.pop()
+            }
             for (const value of emissions.attributes.values) {
                 // get first X characters of date
                 const dayDate = value.datetime.substring(0, dateTruncLength)
