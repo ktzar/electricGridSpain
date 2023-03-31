@@ -8,7 +8,7 @@ import { fetchDaily, fetchInstantByDay, fetchMonthly, fetchYearly } from '../sha
 import { useState } from 'react';
 import { chartOptions } from '../shared/chartOptions';
 
-const getScaleFromData = (data1, data2) => {
+const getScaleFromData = (data1 : any, data2 : any) => {
     let maxValue = -99999
     let minValue = 99999
     for (let i = 0; i < data1.length; i++) {
@@ -107,11 +107,12 @@ export default () => {
                     <h6>Choose another date</h6>
                     <input type="date" id="start" name="trip-start"
                         onChange={val => setInstantDayInput(val.target.value)}
+                        style={{fontSize: '12px'}}
                         value={instantDayInput}
                         min="2015-01-01" max={today}></input>
                     <button
-                        className="btn btn-small btn-primary"
-                        style={{margin: '0.5em', padding: '0.25em 0.5em'}}
+                        className="btn btn-small btn-info"
+                        style={{margin: '0.5em', padding: '0.25em 0.5em', fontSize: '12px'}}
                         onClick={() => setInstantDay(instantDayInput)}>
                             Load</button>
 

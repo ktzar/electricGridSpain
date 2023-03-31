@@ -9,7 +9,7 @@ interface EmissionRecord {
 }
 
 const dataToDataset = (data : EmissionRecord[])  => ({
-        label: 'CO2',
+        label: 'CO2 (g/kWh)',
         data: data.map(d => d.emissions),
         fill: false,
         tension: 0.3,
@@ -59,16 +59,16 @@ export const Emissions = () => {
                 <div className="row">
                     <div className="col-sm-4">
                         <h5>Emissions in the last {dailyEmissions.length} days</h5>
-                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={dailyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit, min: 0, max: 500})} data={dailyData}/>
 
                     </div>
                     <div className="col-sm-4">
                         <h5>Emissions in the last {monthlyEmissions.length} months</h5>
-                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={monthlyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit, min: 0, max: 500})} data={monthlyData}/>
                     </div>
                     <div className="col-sm-4">
                         <h5>Emissions in the last { yearlyEmissions.length } years</h5>
-                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit})} data={yearlyData}/>
+                        <Line options={chartOptions({title: `Emissions gCO2/kWh in period`, unit, min: 0, max: 500})} data={yearlyData}/>
                     </div>
                 </div>
             </div>
