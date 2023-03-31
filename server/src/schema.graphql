@@ -38,6 +38,9 @@ type Day implements Measurement {
     gas: Float,
     carbon: Float,
     emissions: Float,
+    balanceFrance: Float,
+    balanceMorocco: Float,
+    balancePortugal: Float
 }
 
 type Month implements Measurement {
@@ -53,6 +56,11 @@ type Month implements Measurement {
     gas: Float,
     carbon: Float,
     emissions: Float
+    balanceFrance: Float,
+    balanceMorocco: Float,
+    balancePortugal: Float
+    installedWind: Float
+    installedSolar: Float
 }
 
 type Year implements Measurement {
@@ -68,6 +76,11 @@ type Year implements Measurement {
     gas: Float,
     carbon: Float,
     emissions: Float,
+    balanceFrance: Float,
+    balanceMorocco: Float,
+    balancePortugal: Float
+    installedWind: Float
+    installedSolar: Float
 }
 
  type Query {

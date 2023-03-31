@@ -7,6 +7,8 @@ import Today from './components/Today';
 import Averages from './components/Averages';
 import Production from './components/Production';
 import { Emissions } from './components/Emissions';
+import { Balances } from './components/Balances';
+import { Installed } from './components/Installed';
 
 const queryClient = new QueryClient()
 
@@ -27,6 +29,11 @@ const App = () => {
             <hr/>
             <h2>Emissions</h2>
             <Emissions/>
+            <hr/>
+            <h2>Installed</h2>
+            <Installed />
+            <h2>Balances</h2>
+            <Balances />
             <hr/>
             <div className="text-center m-t-5">by <a href="https://github.com/ktzar">ktz</a></div>
             <div className="text-center m-t-5">data from <a href="https://www.ree.es/en/apidatos">Red Eléctrica de España</a></div>

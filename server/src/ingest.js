@@ -37,20 +37,19 @@ function valuesToDates(res, dateFormat, extraDays = 0) {
 }
 
 const getGeneracionUrl = (startDate, endDate, trunc) =>
-    'https://apidatos.ree.es/en/datos/generacion/estructura-generacion?start_date={startDate}&end_date={endDate}&time_trunc={trunc}'
-        .replace('{startDate}', startDate)
-        .replace('{endDate}', endDate)
-        .replace('{trunc}', trunc)
+    `https://apidatos.ree.es/en/datos/generacion/estructura-generacion?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
 const getEmisionesUrl = (startDate, endDate, trunc) =>
-    'https://apidatos.ree.es/en/datos/generacion/no-renovables-detalle-emisiones-CO2?start_date={startDate}&end_date={endDate}&time_trunc={trunc}'
-        .replace('{startDate}', startDate)
-        .replace('{endDate}', endDate)
-        .replace('{trunc}', trunc)
+    `https://apidatos.ree.es/en/datos/generacion/no-renovables-detalle-emisiones-CO2?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
 const getDemandaUrl = date =>
-    'https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha={date}'
-        .replace('{date}', date)
+    `https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=${date}`
+
+const getBalanceUrl = (startDate, endDate, type, country) =>
+    `https://apidatos.ree.es/en/datos/intercambios/${country}-frontera?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
+
+const getInstalledUrl = (startDate, endDate, type) =>
+    `https://apidatos.ree.es/en/datos/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
 export async function ingestInstant(db) {
     try {
@@ -92,6 +91,73 @@ const readingMappings = {
     Cogeneration: 'cogen',
 }
 
+export async function ingestYearlyInstalled(db) {
+    const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
+    //const endDate = format(new Date(), 'yyyy-MM-dd')
+    const reqUrl = getInstalledUrl(startDate, endDate, 'year')
+    try {
+        const res = await axios.get(reqUrl, axiosOptions)
+        const energies = res.data.included.filter(a => a.type === 'Wind' || a.type === 'Solar photovoltaic')
+        energies.forEach(async energy => {
+            energy.attributes.values.forEach(async value => {
+                const installed = value.value
+                const dayDate = value.datetime.substring(0, 4)
+                console.log(energy.type, dayDate, installed)
+                const statement = energy.type === 'Wind' ? ingest.yearlyInstalledWind : ingest.yearlyInstalledSolar
+                await db.run(statement, [dayDate, installed])
+            })
+        })
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+export async function ingestMonthlyInstalled(db) {
+    const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
+    const reqUrl = getInstalledUrl(startDate, endDate, 'month')
+    try {
+        const res = await axios.get(reqUrl, axiosOptions)
+        const energies = res.data.included.filter(a => a.type === 'Wind' || a.type === 'Solar photovoltaic')
+        energies.forEach(async energy => {
+            energy.attributes.values.forEach(async value => {
+                const installed = value.value
+                const dayDate = value.datetime.substring(0, 7)
+                console.log(energy.type, dayDate, installed)
+                const statement = energy.type === 'Wind' ? ingest.monthlyInstalledWind : ingest.monthlyInstalledSolar
+                await db.run(statement, [dayDate, installed])
+            })
+        })
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+export async function ingestDailyBalance(db) {
+    const startDate = format(subDays(new Date(), 30), 'yyyy-MM-dd')
+    const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'day', 10, ingest.dailyBalance('France'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'marruecos', 'day', 10, ingest.dailyBalance('Morocco'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'day', 10, ingest.dailyBalance('Portugal'))
+}
+
+export async function ingestMonthlyBalance(db) {
+    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'month', 7, ingest.monthlyBalance('France'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'marruecos', 'month', 7, ingest.monthlyBalance('Morocco'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'month', 7, ingest.monthlyBalance('Portugal'))
+}
+
+export async function ingestYearlyBalance(db) {
+    const startDate = '2017-01-01'//format(subDays(new Date(), 365*11), 'yyyy-01-01')
+    const endDate = '2018-12-31'
+    //const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'year', 4, ingest.yearlyBalance('France'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'marruecos', 'year', 4, ingest.yearlyBalance('Morocco'))
+    await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'year', 4, ingest.yearlyBalance('Portugal'))
+}
+
 export async function ingestDailyEmissions(db) {
     const startDate = format(subDays(new Date(), 90), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
@@ -105,10 +171,27 @@ export async function ingestMonthlyEmissions(db) {
 }
 
 export async function ingestYearlyEmissions(db) {
-    const startDate = format(subDays(new Date(), 365*16), 'yyyy-01-01')
-    const endDate = format(subDays(new Date(), 365*12), 'yyyy-12-31')
-    //const endDate = format(new Date(), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
+    //const endDate = format(subDays(new Date(), 365*12), 'yyyy-12-31')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'year', 4, ingest.yearlyEmissions)
+}
+
+async function ingestBalanceForCountryAndType(db, startDate, endDate, country, type, dateTruncLength, sqlStatement) {
+    const reqUrl = getBalanceUrl(startDate, endDate, type, country)
+    console.log(reqUrl)
+    try {
+        const res = await axios.get(reqUrl, axiosOptions)
+        const values = res.data.included.find(a => a.type === 'saldo').attributes.values
+        values.forEach(async value => {
+            const balance = value.value
+            const dayDate = value.datetime.substring(0, dateTruncLength)
+            console.log({sqlStatement, dayDate, balance})
+            await db.run(sqlStatement, [dayDate, balance])
+        })
+    } catch (e) {
+        console.error(e)
+    }
 }
 
 async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLength, sqlStatement) {
@@ -248,9 +331,24 @@ open({
             await ingestMonthly(db)
             await ingestYearly(db)
             logger.info('All ingested')
+        } else if(args.data === 'monthlyInstalled') {
+            await ingestMonthlyInstalled(db)
+            logger.info('Monthly balance ingested')
+        } else if(args.data === 'yearlyInstalled') {
+            await ingestYearlyInstalled(db)
+            logger.info('Yearly balance ingested')
         }else if (args.data === 'instant') {
             await ingestInstant(db)
             logger.info('Instant ingested')
+        } else if(args.data === 'dailyBalance') {
+            await ingestDailyBalance(db)
+            logger.info('Daily balance ingested')
+        } else if(args.data === 'monthlyBalance') {
+            await ingestMonthlyBalance(db)
+            logger.info('Monthly balance ingested')
+        } else if(args.data === 'yearlyBalance') {
+            await ingestYearlyBalance(db)
+            logger.info('Yearly balance ingested')
         } else if(args.data === 'dailyEmissions') {
             await ingestDailyEmissions(db)
             logger.info('Daily emissions ingested')

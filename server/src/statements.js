@@ -18,7 +18,14 @@ export const ingest = {
         year: 'insert or replace into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
         dailyEmissions: 'insert into daily (day, emissions) values(?,?) on conflict(day) do update set emissions=excluded.emissions;',
         monthlyEmissions: 'insert into monthly (month, emissions) values(?,?) on conflict(month) do update set emissions=excluded.emissions;',
-        yearlyEmissions: 'insert into yearly (year, emissions) values(?,?) on conflict(year) do update set emissions=excluded.emissions;'
+        yearlyEmissions: 'insert into yearly (year, emissions) values(?,?) on conflict(year) do update set emissions=excluded.emissions;',
+        monthlyInstalledSolar: 'insert or replace into monthly (month, installedSolar) values(?,?) on conflict(month) do update set installedSolar=excluded.installedSolar;',
+        monthlyInstalledWind: 'insert or replace into monthly (month, installedWind) values(?,?) on conflict(month) do update set installedWind=excluded.installedWind;',
+        yearlyInstalledSolar: 'insert or replace into yearly (year, installedSolar) values(?,?) on conflict(year) do update set installedSolar=excluded.installedSolar;',
+        yearlyInstalledWind: 'insert or replace into yearly (year, installedWind) values(?,?) on conflict(year) do update set installedWind=excluded.installedWind;',
+        dailyBalance: country => `insert into daily (day, balance${country}) values(?,?) on conflict(day) do update set balance${country}=excluded.balance${country};`,
+        monthlyBalance: country => `insert into monthly (month, balance${country}) values(?,?) on conflict(month) do update set balance${country}=excluded.balance${country};`,
+        yearlyBalance: country => `insert into yearly (year, balance${country}) values(?,?) on conflict(year) do update set balance${country}=excluded.balance${country};`,
 }
 
 /**

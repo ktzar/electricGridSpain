@@ -40,6 +40,64 @@ export async function fetchInstant() {
     return data.latestInstant
 }
 
+export async function fetchDailyBalances() {
+    const data = await request(endpoint, gql`{
+        latestDaily(count: 90) {
+            day,
+            balanceMorocco,
+            balancePortugal,
+            balanceFrance,
+        }}`
+    )
+    return data.latestDaily
+}
+
+export async function fetchMonthlyInstalled() {
+    const data = await request(endpoint, gql`{
+        latestMonthly(count: 12) {
+            month,
+            installedSolar,
+            installedWind,
+        }}`
+    )
+    return data.latestMonthly
+}
+
+export async function fetchYearlyInstalled() {
+    const data = await request(endpoint, gql`{
+        latestYearly(count: 9) {
+            year,
+            installedSolar,
+            installedWind,
+        }}`
+    )
+    return data.latestYearly
+}
+
+export async function fetchMonthlyBalances() {
+    const data = await request(endpoint, gql`{
+        latestMonthly(count: 12) {
+            month,
+            balanceMorocco,
+            balancePortugal,
+            balanceFrance,
+        }}`
+    )
+    return data.latestMonthly
+}
+
+export async function fetchYearlyBalances() {
+    const data = await request(endpoint, gql`{
+        latestYearly(count: 15) {
+            year,
+            balanceMorocco,
+            balancePortugal,
+            balanceFrance,
+        }}`
+    )
+    return data.latestYearly
+}
+
 export async function fetchDailyEmissions() {
     const data = await request(endpoint, gql`{
         latestDaily(count: 30) { day, emissions }}`
