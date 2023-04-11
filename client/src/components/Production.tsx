@@ -5,8 +5,12 @@ import { useQuery } from 'react-query'
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField, FieldEntity } from '../shared/fields';
 import { fetchDaily, fetchInstantByDay, fetchMonthly, fetchYearly } from '../shared/requests';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 import { chartOptions } from '../shared/chartOptions';
+import { Button } from './Button';
+
+const dateFormat = 'YYYY-MM-DD'
 
 const getScaleFromData = (data1 : any, data2 : any) => {
     let maxValue = -99999
@@ -77,8 +81,13 @@ export default () => {
        </div>
     }
 
+    const instantDateParsed = dayjs(instantDay)
     const clearLabels = Object.keys(latestData[0]).filter(k => k !== 'time')
     const [minValue, maxValue] = getScaleFromData(latestData, latestDataByDay)
+    const yesterdayDate = dayjs().subtract(1, 'day').format(dateFormat)
+    const lastWeekDate = dayjs().subtract(7, 'day').format(dateFormat)
+    const previousDayDate = instantDateParsed.subtract(1, 'day').format(dateFormat)
+    const nextDayDate = instantDateParsed.add(1, 'day').format(dateFormat)
 
     return (
         <>
@@ -108,14 +117,21 @@ export default () => {
                     <input type="date" id="start" name="trip-start"
                         onChange={val => setInstantDayInput(val.target.value)}
                         style={{fontSize: '12px'}}
-                        value={instantDayInput}
+                        value={instantDayInput || instantDay}
                         min="2015-01-01" max={today}></input>
-                    <button
-                        className="btn btn-small btn-info"
-                        style={{margin: '0.5em', padding: '0.25em 0.5em', fontSize: '12px'}}
-                        onClick={() => setInstantDay(instantDayInput)}>
-                            Load</button>
-
+                    <Button onClick={() => setInstantDay(instantDayInput)}>Load</Button>
+                    <br/>
+                    {instantDay === '' ? (<>
+                        <Button onClick={() => setInstantDay(yesterdayDate)}>Yesterday</Button>
+                        <Button onClick={() => setInstantDay(lastWeekDate)}>7 days ago</Button>
+                        </>
+                    ) : (
+                        <>
+                        <Button onClick={() => setInstantDay(previousDayDate)}>&lt; Previous day</Button>
+                        {instantDay != today &&(<Button onClick={() => setInstantDay(today)}>Today</Button>)}
+                        <Button onClick={() => setInstantDay(nextDayDate)}>Next day &gt;</Button>
+                        </>
+                    )}
                 </div>
             </div>
             <div className="row">

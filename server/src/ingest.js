@@ -331,45 +331,37 @@ open({
             await ingestMonthly(db)
             await ingestYearly(db)
             logger.info('All ingested')
-        } else if(args.data === 'monthlyInstalled') {
-            await ingestMonthlyInstalled(db)
-            logger.info('Monthly balance ingested')
-        } else if(args.data === 'yearlyInstalled') {
-            await ingestYearlyInstalled(db)
-            logger.info('Yearly balance ingested')
         }else if (args.data === 'instant') {
             await ingestInstant(db)
             logger.info('Instant ingested')
-        } else if(args.data === 'dailyBalance') {
-            await ingestDailyBalance(db)
-            logger.info('Daily balance ingested')
-        } else if(args.data === 'monthlyBalance') {
-            await ingestMonthlyBalance(db)
-            logger.info('Monthly balance ingested')
-        } else if(args.data === 'yearlyBalance') {
-            await ingestYearlyBalance(db)
-            logger.info('Yearly balance ingested')
-        } else if(args.data === 'dailyEmissions') {
-            await ingestDailyEmissions(db)
-            logger.info('Daily emissions ingested')
-        } else if(args.data === 'monthlyEmissions') {
-            await ingestMonthlyEmissions(db)
-            logger.info('Monthly emissions ingested')
-        } else if(args.data === 'yearlyEmissions') {
-            await ingestYearlyEmissions(db)
-            logger.info('Yearly ingested')
         } else if(args.data === 'daily') {
             await ingestDaily(db)
             logger.info('Daily ingested')
+            await ingestDailyBalance(db)
+            logger.info('Daily balance ingested')
+            await ingestDailyEmissions(db)
+            logger.info('Daily emissions ingested')
         } else if(args.data === 'hourly') {
             await ingestHourly(db)
             logger.info('Hourly ingested')
         } else if(args.data === 'monthly') {
             await ingestMonthly(db)
             logger.info('Monthly ingested')
+            await ingestMonthlyBalance(db)
+            logger.info('Monthly balance ingested')
+            await ingestMonthlyInstalled(db)
+            logger.info('Monthly balance ingested')
+            await ingestMonthlyEmissions(db)
+            logger.info('Monthly emissions ingested')
         } else if(args.data === 'yearly') {
             await ingestYearly(db)
             logger.info('Yearly ingested')
+            await ingestYearlyEmissions(db)
+            logger.info('Yearly emissions ingested')
+            await ingestYearlyBalance(db)
+            logger.info('Yearly balance ingested')
+            await ingestYearlyInstalled(db)
+            logger.info('Yearly balance ingested')
         } else {
             logger.info(`${args.data} data type not recognised`)
         }
