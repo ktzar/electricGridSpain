@@ -12,17 +12,25 @@ interface BalanceRecord {
     balanceFrance: number,
 }
 
-type Country = 'Morocco' | 'Portugal' | 'France'
+type BalanceRecordKeys = keyof BalanceRecord
 
-const dataToDataset = (data : BalanceRecord[], country : Country)  => ({
+const dataToDataset = (data : BalanceRecord[], country : BalanceRecordKeys)  => ({
         label: 'GWh',
-        data: data.map(d => d['balance' + country]),
+        data: data.map(d => d[country]),
         fill: false,
         tension: 0.3,
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: colours[country],
         borderWidth: 1.5
     })
+
+const dataToDatasets = (data : BalanceRecord[]) => {
+    return [
+        dataToDataset(data, 'balanceFrance'),
+        dataToDataset(data, 'balancePortugal'),
+        dataToDataset(data, 'balanceMorocco')
+    ]
+}
 
 
 export const Balances = () => {
@@ -35,29 +43,17 @@ export const Balances = () => {
 
     const dailyData = {
         labels: dailyBalances.map((d : any) => d.day),
-        datasets: [
-            dataToDataset(dailyBalances, 'France'),
-            dataToDataset(dailyBalances, 'Portugal'),
-            dataToDataset(dailyBalances, 'Morocco')
-        ]
+        datasets: dataToDatasets(dailyBalances)
     }
 
     const monthlyData = {
         labels: monthlyBalances.map((d : any) => d.month),
-        datasets: [
-            dataToDataset(monthlyBalances, 'France'),
-            dataToDataset(monthlyBalances, 'Portugal'),
-            dataToDataset(monthlyBalances, 'Morocco')
-        ]
+        datasets: dataToDatasets(monthlyBalances)
     }
 
     const yearlyData = {
         labels: yearlyBalances.map((d : any) => d.year),
-        datasets: [
-            dataToDataset(yearlyBalances, 'France'),
-            dataToDataset(yearlyBalances, 'Portugal'),
-            dataToDataset(yearlyBalances, 'Morocco')
-        ]
+        datasets: dataToDatasets(yearlyBalances)
     }
 
     return <>
@@ -82,9 +78,9 @@ export const Balances = () => {
                 </div>
                 <div className="row">
                     <div className="col-sm-12">
-                        France <SourceIndicator type="France" />
-                        Portugal <SourceIndicator type="Portugal" />
-                        Morocco <SourceIndicator type="Morocco" />
+                        France <SourceIndicator type="balanceFrance" />
+                        Portugal <SourceIndicator type="balancePortugal" />
+                        Morocco <SourceIndicator type="balanceMorocco" />
                     </div>
                 </div>
             </div>

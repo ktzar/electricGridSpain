@@ -19,9 +19,9 @@ export const colours : Record<EnergyType | InstalledTypes | Countries , Colour> 
     cogen: 'yellow',
     gas: 'teal',
     carbon: 'brown',
-    Morocco: 'red',
-    France: 'blue',
-    Portugal: 'green'
+    balanceMorocco: 'red',
+    balanceFrance: 'blue',
+    balancePortugal: 'green'
 }
 
 type GroupConfig = {
