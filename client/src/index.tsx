@@ -32,9 +32,18 @@ const App = () => {
             <hr/>
             <h2>Installed</h2>
             <Installed />
+            <hr/>
             <h2>Balances</h2>
             <Balances />
             <hr/>
+            <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">Red Eléctrica de España</h5>
+                  <p className="card-text">Red Eléctrica de España is a partly state-owned and public limited Spanish corporation which operates the national electricity grid in Spain, where it operates the national power transmission system.</p>
+                  <p>        
+                  </p>
+                </div>
+            </div>
             <div className="text-center m-t-5">by <a href="https://github.com/ktzar">ktz</a></div>
             <div className="text-center m-t-5">data from <a href="https://www.ree.es/en/apidatos">Red Eléctrica de España</a></div>
             <div className="text-center m-t-5">inspired by <a href="https://grid.iamkate.com/">Kate Rose Morley</a></div>

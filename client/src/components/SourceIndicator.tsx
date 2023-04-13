@@ -2,7 +2,8 @@ import { colours } from '../shared/colours'
 import { EnergyType } from '../shared/types'
 
 interface SourceIndicatorProps {
-    type: EnergyType
+    type: EnergyType,
+    title: string
 }
 
 export const SourceIndicator = (props : SourceIndicatorProps) => {
@@ -13,10 +14,11 @@ export const SourceIndicator = (props : SourceIndicatorProps) => {
         display: 'inline-block',
         verticalAlign: 'text-top',
         border: '1px solid black',
-        marginRight: '10px',
+        marginRight: '0px',
+        marginLeft: '10px',
         padding: '2px'
     }
     return (
-        <div style={styles}></div>
+        <><div style={styles}></div> {props.title}</>
     );
 }

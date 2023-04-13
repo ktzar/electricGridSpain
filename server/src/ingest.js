@@ -93,7 +93,7 @@ const readingMappings = {
 
 export async function ingestYearlyInstalled(db) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
-    //const endDate = format(new Date(), 'yyyy-MM-dd')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'year')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
@@ -101,6 +101,7 @@ export async function ingestYearlyInstalled(db) {
         energies.forEach(async energy => {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
+                if (!installed) return
                 const dayDate = value.datetime.substring(0, 4)
                 console.log(energy.type, dayDate, installed)
                 const statement = energy.type === 'Wind' ? ingest.yearlyInstalledWind : ingest.yearlyInstalledSolar
@@ -122,6 +123,7 @@ export async function ingestMonthlyInstalled(db) {
         energies.forEach(async energy => {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
+                if (!installed) return
                 const dayDate = value.datetime.substring(0, 7)
                 console.log(energy.type, dayDate, installed)
                 const statement = energy.type === 'Wind' ? ingest.monthlyInstalledWind : ingest.monthlyInstalledSolar
@@ -142,7 +144,7 @@ export async function ingestDailyBalance(db) {
 }
 
 export async function ingestMonthlyBalance(db) {
-    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
+    const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'month', 7, ingest.monthlyBalance('France'))
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'marruecos', 'month', 7, ingest.monthlyBalance('Morocco'))
@@ -165,7 +167,7 @@ export async function ingestDailyEmissions(db) {
 }
 
 export async function ingestMonthlyEmissions(db) {
-    const startDate = format(subDays(new Date(), 30*24), 'yyyy-MM-01')
+    const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'month', 7, ingest.monthlyEmissions)
 }
@@ -185,6 +187,7 @@ async function ingestBalanceForCountryAndType(db, startDate, endDate, country, t
         const values = res.data.included.find(a => a.type === 'saldo').attributes.values
         values.forEach(async value => {
             const balance = value.value
+            if (!balance) return
             const dayDate = value.datetime.substring(0, dateTruncLength)
             console.log({sqlStatement, dayDate, balance})
             await db.run(sqlStatement, [dayDate, balance])
@@ -271,8 +274,8 @@ export async function ingestHourly(db) {
 }
 
 export async function ingestMonthly(db) {
-    const startDate = format(subDays(new Date(), 30*23), 'yyyy-MM-01')
-    const endDate = format(subDays(new Date(), 30*0), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
+    const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
     logger.info(`Ingesting monthly from ${reqUrl}`)
 

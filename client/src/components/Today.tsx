@@ -111,13 +111,6 @@ export default () => {
                   <div className="card-header">
                      Live Status at {latestData.time}
                   </div>
-                  <div className="card-body">
-                    <h5 className="card-title">Red Eléctrica de España</h5>
-                    <p className="card-text">Red Eléctrica de España is a partly state-owned and public limited Spanish corporation which operates the national electricity grid in Spain, where it operates the national power transmission system.</p>
-                    <p>        
-                    </p>
-
-                  </div>
                 </div>
             </div>
         </div>
@@ -136,8 +129,8 @@ export default () => {
                             <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
                         </thead>
                         <tbody>
-                            <tr><td><SourceIndicator type="carbon"/>Carbon</td><td>{formatAmount(latestData.carbon)} GW</td></tr>
-                            <tr><td><SourceIndicator type="gas"/>Gas</td><td>{formatAmount(latestData.gas)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)} GW</td></tr>
                         </tbody>
                     </table>
                     <table className="table table-bordered">
@@ -145,9 +138,9 @@ export default () => {
                             <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
                         </thead>
                         <tbody>
-                            <tr><td><SourceIndicator type="solarpv"/>Solar</td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
-                            <tr><td><SourceIndicator type="solarthermal"/>Solar Thermal</td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
-                            <tr><td><SourceIndicator type="wind"/>Wind</td><td>{formatAmount(latestData.wind)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)} GW</td></tr>
                         </tbody>
                     </table>
             </div>
@@ -157,8 +150,8 @@ export default () => {
                         <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
                     </thead>
                     <tbody>
-                            <tr><td><SourceIndicator type="nuclear"/>Nuclear</td><td>{formatAmount(latestData.nuclear)} GW</td></tr>
-                            <tr><td><SourceIndicator type="thermal"/>Thermal</td><td>{formatAmount(latestData.thermal)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Nuclear" type="nuclear"/></td><td>{formatAmount(latestData.nuclear)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Thermal" type="thermal"/></td><td>{formatAmount(latestData.thermal)} GW</td></tr>
                     </tbody>
                 </table>
                 <table className="table table-bordered">
@@ -166,7 +159,7 @@ export default () => {
                         <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator type="inter"/>Interchanges</td><td>{formatAmount(latestData.inter)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)} GW</td></tr>
                     </tbody>
                 </table>
             </div>

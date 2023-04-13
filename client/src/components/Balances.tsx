@@ -78,9 +78,9 @@ export const Balances = () => {
                 </div>
                 <div className="row">
                     <div className="col-sm-12">
-                        France <SourceIndicator type="balanceFrance" />
-                        Portugal <SourceIndicator type="balancePortugal" />
-                        Morocco <SourceIndicator type="balanceMorocco" />
+                        <SourceIndicator type="balanceFrance" title="France"/>
+                        <SourceIndicator type="balancePortugal" title="Portugal"/>
+                        <SourceIndicator type="balanceMorocco" title="Morocco" />
                     </div>
                 </div>
             </div>

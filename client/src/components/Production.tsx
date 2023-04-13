@@ -15,6 +15,7 @@ const dateFormat = 'YYYY-MM-DD'
 const getScaleFromData = (data1 : any, data2 : any) => {
     let maxValue = -99999
     let minValue = 99999
+    if (!data1 || !data2) return [ minValue, maxValue ]
     for (let i = 0; i < data1.length; i++) {
         const d = data1[i]
         const keys = Object.keys(d)
@@ -75,7 +76,7 @@ export default () => {
     const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', fetchMonthly, queryOptions)
     const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', fetchYearly, queryOptions)
 
-    if (isLoading || isLoadingInstantDate || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
+    if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
         return <div className="spinner-border" role="status">
            <span className="sr-only"></span>
        </div>
@@ -105,33 +106,37 @@ export default () => {
                     }}/>
                 </div>
                 <div className="col-sm-6 text-center">
-                    <h5>{instantDay === '' ? 'Production for a given day' : instantDay}</h5>
-                    {instantDay !== '' && (
-                        <Line options={chartOptions({title: `Instant production for ${instantDay}`, max: maxValue, min: minValue})} data={{
-                            labels: latestDataByDay.map((k : FieldEntity) => k.time),
-                            datasets: clearLabels.map(labelToDataset(latestDataByDay))
-                        }}/>
-                    )}
-                    {(latestDataByDay.length === 0 && instantDay !== '') && <div className="badge badge-pill badge-danger">No data for this day</div>}
-                    <h6>Choose another date</h6>
-                    <input type="date" id="start" name="trip-start"
-                        onChange={val => setInstantDayInput(val.target.value)}
-                        style={{fontSize: '12px'}}
-                        value={instantDayInput || instantDay}
-                        min="2015-01-01" max={today}></input>
-                    <Button onClick={() => setInstantDay(instantDayInput)}>Load</Button>
-                    <br/>
-                    {instantDay === '' ? (<>
-                        <Button onClick={() => setInstantDay(yesterdayDate)}>Yesterday</Button>
-                        <Button onClick={() => setInstantDay(lastWeekDate)}>7 days ago</Button>
-                        </>
-                    ) : (
+                    {!isLoadingInstantDate &&
                         <>
-                        <Button onClick={() => setInstantDay(previousDayDate)}>&lt; Previous day</Button>
-                        {instantDay != today &&(<Button onClick={() => setInstantDay(today)}>Today</Button>)}
-                        <Button onClick={() => setInstantDay(nextDayDate)}>Next day &gt;</Button>
+                            <h5>{instantDay === '' ? 'Production for a given day' : instantDay}</h5>
+                            {instantDay !== '' && (
+                                <Line options={chartOptions({title: `Instant production for ${instantDay}`, max: maxValue, min: minValue})} data={{
+                                    labels: latestDataByDay.map((k : FieldEntity) => k.time),
+                                    datasets: clearLabels.map(labelToDataset(latestDataByDay))
+                                }}/>
+                            )}
+                            {(latestDataByDay.length === 0 && instantDay !== '') && <div className="badge badge-pill badge-danger">No data for this day</div>}
+                            <h6>Choose another date</h6>
+                            <input type="date" id="start" name="trip-start"
+                                onChange={val => setInstantDayInput(val.target.value)}
+                                style={{fontSize: '12px'}}
+                                value={instantDayInput || instantDay}
+                                min="2015-01-01" max={today}></input>
+                            <Button onClick={() => setInstantDay(instantDayInput)}>Load</Button>
+                            <br/>
+                            {instantDay === '' ? (<>
+                                <Button onClick={() => setInstantDay(yesterdayDate)}>Yesterday</Button>
+                                <Button onClick={() => setInstantDay(lastWeekDate)}>7 days ago</Button>
+                                </>
+                            ) : (
+                                <>
+                                <Button onClick={() => setInstantDay(previousDayDate)}>&lt; Previous day</Button>
+                                {instantDay != today &&(<Button onClick={() => setInstantDay(today)}>Today</Button>)}
+                                <Button onClick={() => setInstantDay(nextDayDate)}>Next day &gt;</Button>
+                                </>
+                            )}
                         </>
-                    )}
+                    }
                 </div>
             </div>
             <div className="row">
