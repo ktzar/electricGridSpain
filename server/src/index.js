@@ -12,7 +12,7 @@ import { buildSchema } from 'graphql'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
 import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant } from './ingest.js'
-import { createEnergeController } from './controllers/energy.js'
+import { createEnergyController } from './controllers/energy.js'
 
 const app = express()
 const { PORT, DB_FILE, PUBLIC_PATH } = process.env
@@ -28,7 +28,7 @@ const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, 'schema.graph
 
 const root = db => ({
     latestInstant: async () => {
-        const row = await db.get(select.instantLast)
+        const row = await db.get(select.instantLatest(1))
         return row;
     },
     latestInstantByDay: async ({day}) => {
@@ -57,7 +57,7 @@ open({
     setInterval(() => { ingestInstant(db) }, oneMinute * 30)
     setInterval(() => { ingestDaily(db) }, oneHour * 12)
     setInterval(() => { ingestYearly(db); ingestMonthly(db) }, oneDay * 3)
-    const energyController = createEnergeController(db)
+    const energyController = createEnergyController(db)
     const graphQlController = graphqlHTTP({
         schema,
         rootValue: root(db),

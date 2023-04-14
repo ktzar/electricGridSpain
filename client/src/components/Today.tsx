@@ -7,6 +7,32 @@ import { fetchInstant } from '../shared/requests';
 import formatAmount from '../shared/formatAmount';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 
+const sumObjectValues = (data : Record<string, number>) => {
+    let all = 0
+    for (let key in data) {
+        all += Math.round(data[key]) | 0
+    }
+    return all
+}
+
+export const getNegativeDataset = (data : MeasurementSet) => {
+    const all = sumObjectValues(data)
+    const negativeData = Object.entries(data).filter(([key, value]) => value < 0)
+    const labels = negativeData.map(([key, value]) => key)
+    const values = negativeData.map(([key, value]) => value)
+    const backgroundColor = negativeData.map(([key, value]) => colours[key])
+    labels.push('National consumption')
+    values.push(-all - values.reduce((v, a) => v + a, 0))
+    backgroundColor.push('lightgrey')
+    return { 
+        labels,
+        data: values,
+        radius: '150%',
+        backgroundColor
+    }
+}
+
+
 const groupByEnergyGroup = (data : MeasurementSet) => {
     const cleanData = Object.keys(data)
         .filter(a => data[a] > 0)
@@ -45,14 +71,6 @@ const doughnutOptions = (title = '') => ({
         }
     }
 })
-
-const sumObjectValues = (data : Record<string, number>) => {
-    let all = 0
-    for (let key in data) {
-        all += Math.round(data[key]) | 0
-    }
-    return all
-}
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', fetchInstant, queryOptions)
@@ -94,12 +112,7 @@ export default () => {
                 radius: '130%',
                 backgroundColor: Object.values(energyGroups).map(v => v.colour)
             },
-            { 
-                labels: ['Exported', 'Produced for national consumption'],
-                data: [-latestData.inter, all],
-                radius: '150%',
-                backgroundColor: ['pink', 'white']
-            }
+            getNegativeDataset(latestData)
         ],
     }
 
@@ -124,25 +137,25 @@ export default () => {
                 </div>
             </div>
             <div className="col">
-                    <table className="table table-bordered">
-                        <thead style={{background: '#fcc'}}>
-                            <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)} GW</td></tr>
-                            <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)} GW</td></tr>
-                        </tbody>
-                    </table>
-                    <table className="table table-bordered">
-                        <thead style={{background: '#cfc'}}>
-                            <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
-                            <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
-                            <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)} GW</td></tr>
-                        </tbody>
-                    </table>
+                <table className="table table-bordered">
+                    <thead style={{background: '#cfc'}}>
+                        <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)} GW</td></tr>
+                    </tbody>
+                </table>
+                <table className="table table-bordered">
+                    <thead style={{background: '#fcc'}}>
+                        <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)} GW</td></tr>
+                    </tbody>
+                </table>
             </div>
             <div className="col">
                 <table className="table table-bordered">

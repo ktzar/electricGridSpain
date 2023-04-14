@@ -1,11 +1,11 @@
 import express from 'express';
 import { select } from '../statements.js'
 
-export const createEnergeController = db => {
+export const createEnergyController = db => {
     const energy = express.Router()
 
     energy.get('/instant', async (req, res) => {
-        const row = await db.get(select.instantLast)
+        const row = await db.get(select.instantLatest(1))
         res.send(row)
     })
 
@@ -15,7 +15,7 @@ export const createEnergeController = db => {
             res.send(row)
             return
         }
-        const row = await db.all(select.instantLatest)
+        const row = await db.all(select.instantLatest(144))
         res.send(row.reverse())
     })
 

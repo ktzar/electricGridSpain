@@ -1,7 +1,6 @@
 
 export const select = {
-    instantLast: 'select * from instant order by time desc limit 0,1',
-    instantLatest: 'select * from instant order by time desc limit 0,144',
+    instantLatest: count => `select * from instant order by time desc limit 0,${count}`,
     instantLatestByDay: day => `select * from instant where time like '${day}%' order by time desc limit 0,144`,
     dailyLatest: count => `select * from daily order by day desc limit 0,${count}`,
     monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
