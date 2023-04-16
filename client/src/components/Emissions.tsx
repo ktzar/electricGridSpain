@@ -53,7 +53,7 @@ export const Emissions = () => {
     return <>
         <div className="card mt-2">
             <div className="card-header">
-                How many grams of CO2 is sent to the atmosphere to produce a kWh of electricity.
+                How many grams of CO2 are sent to the atmosphere to produce a kWh of electricity.
             </div>
             <div className="card-body">
                 <div className="row">
