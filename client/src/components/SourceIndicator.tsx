@@ -19,6 +19,6 @@ export const SourceIndicator = (props : SourceIndicatorProps) => {
         padding: '2px'
     }
     return (
-        <><div style={styles}></div> {props.title}</>
+        <><div style={styles}></div> <small>{props.title}</small></>
     );
 }

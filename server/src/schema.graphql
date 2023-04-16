@@ -83,10 +83,18 @@ type Year implements Measurement {
     installedSolar: Float
 }
 
+type RenewablesRecord {
+    windTime: String,
+    windValue: Float,
+    solarpvTime: String,
+    solarpvValue: Float
+}
+
  type Query {
      latestInstant: Instant,
      latestInstantByDay(day: String): [Instant],
      latestDaily(count: Int): [Day],
      latestMonthly(count: Int): [Month],
      latestYearly(count: Int): [Year]
+     renewablesRecord: RenewablesRecord
  }

@@ -74,6 +74,7 @@ const doughnutOptions = (title = '') => ({
 
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', fetchInstant, queryOptions)
+
     if (isLoading) {
         return <span>Loading...</span>
     }
@@ -145,6 +146,7 @@ export default () => {
                         <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
                         <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
                         <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Hydro" type="hidro"/></td><td>{formatAmount(latestData.hidro)} GW</td></tr>
                     </tbody>
                 </table>
                 <table className="table table-bordered">
@@ -154,6 +156,7 @@ export default () => {
                     <tbody>
                         <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)} GW</td></tr>
                         <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Cogeneration" type="cogen"/></td><td>{formatAmount(latestData.cogen)} GW</td></tr>
                     </tbody>
                 </table>
             </div>

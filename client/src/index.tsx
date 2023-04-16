@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 import 'chart.js/auto';
 
 import Today from './components/Today';
+import Records from './components/Records';
 import Averages from './components/Averages';
 import Production from './components/Production';
 import { Emissions } from './components/Emissions';
@@ -19,13 +20,16 @@ const App = () => {
         <div className="container">
             <h1 className="text-center">🇪🇸 Spanish grid dashboard</h1>
             <h2>Today</h2>
-            <Today/>
+            <Today />
             <hr/>
             <h2>Averages</h2>
             <Averages/>
             <hr/>
             <h2>Production</h2>
             <Production/>
+            <hr/>
+            <h2>Records</h2>
+            <Records />
             <hr/>
             <h2>Emissions</h2>
             <Emissions/>

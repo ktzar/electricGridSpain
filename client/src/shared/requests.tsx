@@ -21,6 +21,17 @@ export async function fetchInstantByDay(day: string) {
     return data.latestInstantByDay
 }
 
+export async function fetchRecords() {
+    const data = await request(endpoint, gql`{
+        renewablesRecord {
+            windTime
+            windValue
+            solarpvTime
+            solarpvValue
+          }
+        }`)
+    return data.renewablesRecord
+}
 
 export async function fetchInstant() {
     const data = await request(endpoint, gql`{

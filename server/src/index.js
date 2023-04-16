@@ -45,6 +45,16 @@ const root = db => ({
     latestYearly: async ({count = 12}) => {
         const row = await db.all(select.yearlyLatest(count))
         return row.reverse()
+    },
+    renewablesRecord: async () => {
+        const solarRow = await db.get('select max(solarpv) as solarpv, time from instant')
+        const windRow = await db.get('select max(wind) as wind, time from instant')
+        return {
+            windTime: windRow.time,
+            windValue: windRow.wind,
+            solarpvTime: solarRow.time,
+            solarpvValue: solarRow.solarpv
+        }
     }
 })
 

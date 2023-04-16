@@ -108,7 +108,7 @@ export default () => {
                 <div className="col-sm-6 text-center">
                     {!isLoadingInstantDate &&
                         <>
-                            <h5>{instantDay === '' ? 'Production for a given day' : instantDay}</h5>
+                            <h5>{instantDay === '' ? 'Production for a given day' : 'Production for ' + dayjs(instantDay).format('DD/MMM/YY')}</h5>
                             {instantDay !== '' && (
                                 <Line options={chartOptions({title: `Instant production for ${instantDay}`, max: maxValue, min: minValue})} data={{
                                     labels: latestDataByDay.map((k : FieldEntity) => k.time),
@@ -116,7 +116,6 @@ export default () => {
                                 }}/>
                             )}
                             {(latestDataByDay.length === 0 && instantDay !== '') && <div className="badge badge-pill badge-danger">No data for this day</div>}
-                            <h6>Choose another date</h6>
                             <input type="date" id="start" name="trip-start"
                                 onChange={val => setInstantDayInput(val.target.value)}
                                 style={{fontSize: '12px'}}
