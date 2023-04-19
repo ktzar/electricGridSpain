@@ -322,49 +322,29 @@ export async function ingestYearly(db) {
     }
 }
 
+// map of arguments to functions
+const argMapToFunctions = {
+    'all': [ingestInstant, ingestDaily, ingestMonthly, ingestYearly],
+    'emissions': [ingestDailyEmissions, ingestMonthlyEmissions, ingestYearlyEmissions],
+    'balance': [ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance],
+    'installed': [ingestMonthlyInstalled, ingestYearlyInstalled],
+    'daily': [ingestDaily, ingestDailyBalance, ingestDailyEmissions],
+    'monthly': [ingestMonthly, ingestMonthlyBalance, ingestMonthlyInstalled, ingestMonthlyEmissions],
+    'yearly': [ingestYearly, ingestYearlyEmissions, ingestYearlyInstalled, ingestYearlyBalance],
+    'instant': [ingestInstant],
+    'hourly': [ingestHourly],
+}
+
 open({
     filename: DB_FILE,
     driver: sqlite3.verbose().Database
 }).then(async db => {
-
     try {
-        if (args.data === 'all') {
-            await ingestInstant(db)
-            await ingestDaily(db)
-            await ingestMonthly(db)
-            await ingestYearly(db)
-            logger.info('All ingested')
-        }else if (args.data === 'instant') {
-            await ingestInstant(db)
-            logger.info('Instant ingested')
-        } else if(args.data === 'daily') {
-            await ingestDaily(db)
-            logger.info('Daily ingested')
-            await ingestDailyBalance(db)
-            logger.info('Daily balance ingested')
-            await ingestDailyEmissions(db)
-            logger.info('Daily emissions ingested')
-        } else if(args.data === 'hourly') {
-            await ingestHourly(db)
-            logger.info('Hourly ingested')
-        } else if(args.data === 'monthly') {
-            await ingestMonthly(db)
-            logger.info('Monthly ingested')
-            await ingestMonthlyBalance(db)
-            logger.info('Monthly balance ingested')
-            await ingestMonthlyInstalled(db)
-            logger.info('Monthly balance ingested')
-            await ingestMonthlyEmissions(db)
-            logger.info('Monthly emissions ingested')
-        } else if(args.data === 'yearly') {
-            await ingestYearly(db)
-            logger.info('Yearly ingested')
-            await ingestYearlyEmissions(db)
-            logger.info('Yearly emissions ingested')
-            await ingestYearlyBalance(db)
-            logger.info('Yearly balance ingested')
-            await ingestYearlyInstalled(db)
-            logger.info('Yearly balance ingested')
+        if (argMapToFunctions[args.data]) {
+            for (const func of argMapToFunctions[args.data]) {
+                await func(db)
+                console.log('Processed ' + func.name)
+            }
         } else {
             logger.info(`${args.data} data type not recognised`)
         }

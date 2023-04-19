@@ -9,6 +9,7 @@ import logger from './logger.js'
 import { select } from './statements.js'
 import { graphqlHTTP } from 'express-graphql'
 import { buildSchema } from 'graphql'
+import cron from 'node-cron'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
 import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant } from './ingest.js'
@@ -58,15 +59,17 @@ const root = db => ({
     }
 })
 
+
 open({
         filename: DB_FILE,
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-    //ingestInstant(db)
-    setInterval(() => { ingestInstant(db) }, oneMinute * 30)
-    setInterval(() => { ingestDaily(db) }, oneHour * 12)
-    setInterval(() => { ingestYearly(db); ingestMonthly(db) }, oneDay * 3)
+    cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
+    cron.schedule('59 23 * * *', () => ingestDaily(db))
+    cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
+    cron.schedule('0 4 1 * *', () => ingestYearly(db))
+
     const energyController = createEnergyController(db)
     const graphQlController = graphqlHTTP({
         schema,
