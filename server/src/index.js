@@ -12,7 +12,7 @@ import { buildSchema } from 'graphql'
 import cron from 'node-cron'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
-import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant } from './ingest.js'
+import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
 const app = express()
@@ -68,7 +68,20 @@ open({
     cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
     cron.schedule('59 23 * * *', () => ingestDaily(db))
     cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
-    cron.schedule('0 4 1 * *', () => ingestYearly(db))
+    cron.schedule('0 4 1 * *', () => {
+        ingestYearly(db)
+        ingestYearlyEmissions(db)
+        ingestYearlyBalance(db)
+        ingestYearlyInstalled(db)
+    })
+    cron.schedule('0 5 */3 * *', () => {
+        ingestDailyEmissions(db)
+        ingestMonthlyEmissions(db)
+        ingestDailyBalance(db)
+        ingestMonthlyBalance(db)
+        ingestMonthlyInstalled(db)
+        ingestYearlyInstalled(db)
+    })
 
     const energyController = createEnergyController(db)
     const graphQlController = graphqlHTTP({
