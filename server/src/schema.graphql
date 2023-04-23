@@ -25,6 +25,11 @@ type Instant implements Measurement {
     carbon: Float,
 }
 
+type Hour {
+    hour: String!,
+    pvpc: Float,
+}
+
 type Day implements Measurement {
     day: String!
     solarpv: Float,
@@ -93,6 +98,7 @@ type RenewablesRecord {
  type Query {
      latestInstant: Instant,
      latestInstantByDay(day: String): [Instant],
+     latestHourly(count: Int): [Hour],
      latestDaily(count: Int): [Day],
      latestMonthly(count: Int): [Month],
      latestYearly(count: Int): [Year]

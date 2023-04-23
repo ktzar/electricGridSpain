@@ -6,6 +6,7 @@ import { SourceIndicator } from './SourceIndicator';
 import { fetchInstant } from '../shared/requests';
 import formatAmount from '../shared/formatAmount';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
+import { PVP } from './PVP';
 
 const sumObjectValues = (data : Record<string, number>) => {
     let all = 0
@@ -159,8 +160,6 @@ export default () => {
                         <tr><td><SourceIndicator title="Cogeneration" type="cogen"/></td><td>{formatAmount(latestData.cogen)} GW</td></tr>
                     </tbody>
                 </table>
-            </div>
-            <div className="col">
                 <table className="table table-bordered">
                     <thead style={{background: '#aaf', color: 'white'}}>
                         <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
@@ -170,6 +169,8 @@ export default () => {
                             <tr><td><SourceIndicator title="Thermal" type="thermal"/></td><td>{formatAmount(latestData.thermal)} GW</td></tr>
                     </tbody>
                 </table>
+            </div>
+            <div className="col">
                 <table className="table table-bordered">
                     <thead style={{background: '#ccc'}}>
                         <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
@@ -178,6 +179,7 @@ export default () => {
                         <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)} GW</td></tr>
                     </tbody>
                 </table>
+                <PVP />
             </div>
         </div>
         </>

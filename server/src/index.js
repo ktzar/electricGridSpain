@@ -12,7 +12,7 @@ import { buildSchema } from 'graphql'
 import cron from 'node-cron'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
-import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance } from './ingest.js'
+import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance, ingestHourlyPvpc } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
 const app = express()
@@ -37,6 +37,10 @@ const root = db => ({
     },
     latestDaily: async ({count = 30}) => {
         const row = await db.all(select.dailyLatest(count))
+        return row.reverse()
+    },
+    latestHourly: async ({count = 72}) => {
+        const row = await db.all(select.hourlyLatest(count))
         return row.reverse()
     },
     latestMonthly: async ({count = 12}) => {
@@ -66,7 +70,10 @@ open({
 }).then(adb => {
     const db = adb
     cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
-    cron.schedule('59 23 * * *', () => ingestDaily(db))
+    cron.schedule('59 23 * * *', () => {
+        ingestDaily(db)
+        ingestHourlyPvpc(db)
+    })
     cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
     cron.schedule('0 4 1 * *', () => {
         ingestYearly(db)

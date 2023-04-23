@@ -36,20 +36,25 @@ function valuesToDates(res, dateFormat, extraDays = 0) {
     return values
 }
 
+const API_BASE = 'https://apidatos.ree.es/en/datos'
+
+const getPvpcUrl = (startDate, endDate, trunc) =>
+    `${API_BASE}/mercados/precios-mercados-tiempo-real?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
+
 const getGeneracionUrl = (startDate, endDate, trunc) =>
-    `https://apidatos.ree.es/en/datos/generacion/estructura-generacion?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
+    `${API_BASE}/generacion/estructura-generacion?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
 const getEmisionesUrl = (startDate, endDate, trunc) =>
-    `https://apidatos.ree.es/en/datos/generacion/no-renovables-detalle-emisiones-CO2?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
+    `${API_BASE}/generacion/no-renovables-detalle-emisiones-CO2?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
 const getDemandaUrl = date =>
     `https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=${date}`
 
 const getBalanceUrl = (startDate, endDate, type, country) =>
-    `https://apidatos.ree.es/en/datos/intercambios/${country}-frontera?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
+    `${API_BASE}/intercambios/${country}-frontera?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
 const getInstalledUrl = (startDate, endDate, type) =>
-    `https://apidatos.ree.es/en/datos/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
+    `${API_BASE}/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
 export async function ingestInstant(db) {
     try {
@@ -89,6 +94,7 @@ const readingMappings = {
     'Solar photovoltaic': 'solarpv',
     'Thermal solar': 'solarthermal',
     Cogeneration: 'cogen',
+    'PVPC (€/MWh)': 'pvpc',
 }
 
 export async function ingestYearlyInstalled(db) {
@@ -248,30 +254,31 @@ export async function ingestDaily(db) {
     }
 }
 
-
-export async function ingestHourly(db) {
-    const startDate = format(subDays(new Date(), 5), 'yyyy-MM-dd')
-    const endDate = format(new Date(), 'yyyy-MM-dd')
-    const reqUrl = getGeneracionUrl(startDate, endDate, 'hour')
+export async function ingestHourlyPvpc(db) {
+    const startDate = format(subDays(new Date(), 7), 'yyyy-MM-dd')
+    const endDate = format(addDays(new Date(), 2), 'yyyy-MM-dd')
+    const reqUrl = getPvpcUrl(startDate, endDate, 'hour')
     logger.info(`Ingesting hourly from ${reqUrl}`)
 
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const values = valuesToDates(res, 'yyyy-MM-HH')
-        logger.info(`Values received have a length of ${values}`)
+        const values = valuesToDates(res, 'yyyy-MM-dd HH')
+        logger.info(`Values received have a length of ${values.length}`)
 
-        for (const date in values) {
-            const readings = values[date]
-            const res = await db.run(ingest.hourly, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
+        for (const hour in values) {
+            const readings = values[hour]
+            console.log('executing',ingest.hourlyPvpc, [hour, readings.pvpc])
+            const res = await db.run(ingest.hourlyPvpc, [hour, readings.pvpc])
             logger.info(`last id of values inserted ${res.lastID}`)
         }
         return values
     } catch(e) { 
-        const message = `Error updating monthly data ${e}`
+        const message = `Error updating hourly pvpc data ${e}`
         logger.error(message)
         return { error: true, message }
     }
 }
+
 
 export async function ingestMonthly(db) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
@@ -332,7 +339,7 @@ const argMapToFunctions = {
     'monthly': [ingestMonthly, ingestMonthlyBalance, ingestMonthlyInstalled, ingestMonthlyEmissions],
     'yearly': [ingestYearly, ingestYearlyEmissions, ingestYearlyInstalled, ingestYearlyBalance],
     'instant': [ingestInstant],
-    'hourly': [ingestHourly],
+    'pvpc': [ingestHourlyPvpc],
 }
 
 open({

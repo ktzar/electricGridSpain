@@ -4,7 +4,9 @@ export const select = {
     instantLatestByDay: day => `select * from instant where time like '${day}%' order by time desc limit 0,144`,
     dailyLatest: count => `select * from daily order by day desc limit 0,${count}`,
     monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
-    yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`
+    yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`,
+    hourlyLatest: count => `select * from hourly order by hour desc limit 0,${count}`,
+
 }
 
 const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon'
@@ -25,6 +27,7 @@ export const ingest = {
         dailyBalance: country => `insert into daily (day, balance${country}) values(?,?) on conflict(day) do update set balance${country}=excluded.balance${country};`,
         monthlyBalance: country => `insert into monthly (month, balance${country}) values(?,?) on conflict(month) do update set balance${country}=excluded.balance${country};`,
         yearlyBalance: country => `insert into yearly (year, balance${country}) values(?,?) on conflict(year) do update set balance${country}=excluded.balance${country};`,
+        hourlyPvpc: 'insert into hourly (hour, pvpc) values(?,?) on conflict(hour) do update set pvpc=excluded.pvpc;',
 }
 
 /**
