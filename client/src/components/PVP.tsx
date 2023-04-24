@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Line } from 'react-chartjs-2';
 import { chartOptions } from '../shared/chartOptions';
 import { fetchHourlyPvp } from '../shared/requests';
@@ -10,7 +11,7 @@ export const PVP = () => {
     if (!data || isLoading) return <h2>Loading...</h2>
 
     const monthlyData = {
-        labels: data.map((d : any) => d.hour + ':00'),
+        labels: data.map((d : any) => dayjs(d.hour + ':00').format('dd HH') + 'h'),
         datasets: [
             {
                 label: 'PVPC (€)',
@@ -32,7 +33,7 @@ export const PVP = () => {
         <div className="card">
             <div className="card-header">Consumer price (€/MWh)</div>
             <div className="card-body">
-                <Line options={chartOptions({ title: ``, unit: '€/MWh', max: null })} data={monthlyData} />
+                <Line options={chartOptions({ title: ``, unit: '€/MWh', max: 0, displayXAxis: true })} data={monthlyData} />
             </div>
         </div>
     </>

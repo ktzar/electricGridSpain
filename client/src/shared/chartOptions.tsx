@@ -2,7 +2,8 @@ export const chartOptions = ({
     title = 'Average Production in period (GW)',
     unit = 'GWh',
     min = 0,
-    max = 5000
+    max = 5000,
+    displayXAxis = false
 } = {}) => ({
     responsive: true,
     plugins: {
@@ -25,7 +26,7 @@ export const chartOptions = ({
     },
     scales: {
         x: {
-            display: false,
+            display: displayXAxis,
             title: {
                 display: true
             }

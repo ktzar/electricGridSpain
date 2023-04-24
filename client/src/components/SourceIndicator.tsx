@@ -1,22 +1,51 @@
 import { colours } from '../shared/colours'
 import { EnergyType } from '../shared/types'
+import InfoIconTooltip from './InfoIconTooltip';
 
 interface SourceIndicatorProps {
     type: EnergyType,
     title: string
 }
 
-const energyInfo : Record<EnergyType, string> = {
-    solarpv: 'Solar PV is the conversion of sunlight into electricity, either directly using photovoltaics (PV), or indirectly using concentrated solar power (CSP).',
-    wind: 'Wind power is the use of air flow through wind turbines to mechanically power generators for electric power. Wind power, as an alternative to burning fossil fuels, is plentiful, renewable, widely distributed, clean, produces no greenhouse gas emissions during operation, consumes no water, and uses little land.',
-    hidro: 'Hydropower or water power is power derived from the energy of falling or fast-flowing water, which may be harnessed for useful purposes. Hydropower is a renewable energy source.',
-    solarthermal: 'Solar thermal energy is a form of energy and a technology for harnessing solar energy to generate thermal energy or electrical energy for use in industry, and in the residential and commercial sectors. A wide range of applications use solar thermal energy, including hot water heating, central heating, air conditioning, thermal desalination, cooking, drying, and space heating.',
-    carbon: 'Coal is a combustible black or brownish-black sedimentary rock usually occurring in rock strata in layers or veins called coal beds or coal seams. The harder forms, such as anthracite coal, can be regarded as metamorphic rock because of later exposure to elevated temperature and pressure.',
-    gas: 'Natural gas is a naturally occurring hydrocarbon gas mixture consisting primarily of methane, but commonly including varying amounts of other higher alkanes, and sometimes a small percentage of carbon dioxide, nitrogen, oxygen, and sulfur.',
-    cogeneration: 'Cogeneration or combined heat and power (CHP) is the use of a heat engine or power station to generate electricity and useful heat at the same time. Trigeneration or combined cooling, heat and power (CCHP) refers to the simultaneous generation of electricity and useful heating and cooling from the combustion of a fuel or a solar heat source. Cogeneration and trigeneration are both means of achieving energy efficiency, and are both forms of combined heat and power (CHP).',
-    nuclear: 'Nuclear power is the use of nuclear reactions that release nuclear energy to generate heat, which most frequently is then used in steam turbines to produce electricity in a nuclear power plant. Nuclear power can be obtained from nuclear fission, nuclear decay and nuclear fusion reactions.',
-    thermal: 'Thermal power is the largest source of power generation in India. There are different types of thermal power plants based on the fuel used to generate the steam such as coal, gas, and diesel, natural gas. Based on the type of steam cycle used to convert water into steam, we can classify the thermal power plants as coal-based thermal power plant, gas-based thermal power plant and diesel-based thermal power plant.'
-}
+const energyInfo : Record<EnergyType, {title: string, desc: string}> = {
+    solarpv: {
+        title: 'Solar photovoltaics',
+        desc: 'Solar Photovoltaics: Solar photovoltaics (PV) convert sunlight directly into electricity through semiconducting materials. This clean and sustainable energy source is increasingly utilized for residential, commercial, and utility-scale applications.'
+    },
+    wind: {
+        title: 'Wind Energy',
+        desc: 'Wind energy harnesses the power of moving air by utilizing wind turbines that convert kinetic energy into mechanical energy, which is then transformed into electricity. It\'s an abundant and eco-friendly energy source that contributes significantly to reducing greenhouse gas emissions.'
+    },
+    hidro: {
+        title: 'Hydroelectric Power',
+        desc: 'Hydroelectric power generates electricity by harnessing the energy of flowing water, typically through the construction of dams and turbines. This renewable and reliable energy source is one of the oldest and most widely used forms of green energy production.'
+    },
+    solarthermal: {
+        title: 'Solar Concentration Systems',
+        desc: 'Solar concentration systems use mirrors or lenses to focus sunlight onto a small area, generating intense heat that drives turbines or engines to produce electricity. This renewable technology offers large-scale power generation with minimal environmental impact.'
+    },
+    carbon: {
+        title: 'Coal Power',
+        desc: 'Coal is a fossil fuel formed from ancient plant material, which, when burned, releases energy in the form of heat. Its widespread use for electricity generation, however, contributes to significant air pollution and greenhouse gas emissions.'
+    },
+    gas: {
+        title: 'Natural Gas',
+        desc: 'Natural gas, primarily composed of methane, is extracted from underground reservoirs and used as a fuel for electricity generation, heating, and transportation. While it burns cleaner than coal, it remains a finite resource that contributes to greenhouse gas emissions.'
+    },
+    cogen: {
+        title: 'Cogeneration',
+        desc: 'Cogeneration, or combined heat and power (CHP), is an energy-efficient process that simultaneously generates electricity and useful thermal energy from a single fuel source, such as natural gas, biomass, or coal. This method reduces energy waste and lowers overall emissions.'
+    },
+    nuclear: {
+        title: 'Nuclear Power',
+        desc: 'Nuclear power plants generate electricity by using the heat produced from nuclear fission, wherein atomic nuclei are split, releasing a large amount of energy. This energy source provides reliable, low-emission electricity but raises concerns about radioactive waste management and safety.'
+    },
+    thermal: {
+        title: 'Geothermal Energy',
+        desc: 'Thermal energy is derived from heat stored within the Earth\'s crust and can be harnessed through geothermal power plants. This sustainable and low-emission energy source taps into the planet\'s natural heat for electricity generation and heating applications.'
+    }
+      };
+
 
 export const SourceIndicator = (props : SourceIndicatorProps) => {
     const styles = {
@@ -31,10 +60,11 @@ export const SourceIndicator = (props : SourceIndicatorProps) => {
         padding: '2px'
     }
 
-    const tooltip = energyInfo[props.type]
+    const tooltip = energyInfo[props.type] && energyInfo[props.type].desc || false
+    const title = energyInfo[props.type] && energyInfo[props.type].title || props.title
     return (
         <>
-            <div style={styles}></div> <small>{props.title}</small> {tooltip && <span title={tooltip} style={{cursor: 'pointer'}}>ⓘ</span>}
+            <div style={styles}></div> <small>{title}</small> {tooltip && <InfoIconTooltip text={tooltip} />}
         </>
     )
 }
