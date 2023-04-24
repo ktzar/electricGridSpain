@@ -56,9 +56,9 @@ const getBalanceUrl = (startDate, endDate, type, country) =>
 const getInstalledUrl = (startDate, endDate, type) =>
     `${API_BASE}/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
-export async function ingestInstant(db) {
+export async function ingestInstant(db, overrideDate) {
     try {
-        const date = format(new Date(), 'yyyy-MM-dd')
+        const date = overrideDate || format(new Date(), 'yyyy-MM-dd')
         const reqUrl = getDemandaUrl(date)
         logger.info(`Requesting ${reqUrl}`)
 

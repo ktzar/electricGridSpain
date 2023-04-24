@@ -73,6 +73,9 @@ open({
     cron.schedule('59 23 * * *', () => {
         ingestDaily(db)
         ingestHourlyPvpc(db)
+        //consume instant data from a year ago
+        const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
+        ingestInstant(db, oneYearAgo)
     })
     cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
     cron.schedule('0 4 1 * *', () => {
