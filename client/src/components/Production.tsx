@@ -87,6 +87,7 @@ export default () => {
     const [minValue, maxValue] = getScaleFromData(latestData, latestDataByDay)
     const yesterdayDate = dayjs().subtract(1, 'day').format(dateFormat)
     const lastWeekDate = dayjs().subtract(7, 'day').format(dateFormat)
+    const lastYearDate = dayjs().subtract(1, 'year').format(dateFormat)
     const previousDayDate = instantDateParsed.subtract(1, 'day').format(dateFormat)
     const nextDayDate = instantDateParsed.add(1, 'day').format(dateFormat)
 
@@ -126,6 +127,7 @@ export default () => {
                             {instantDay === '' ? (<>
                                 <Button onClick={() => setInstantDay(yesterdayDate)}>Yesterday</Button>
                                 <Button onClick={() => setInstantDay(lastWeekDate)}>7 days ago</Button>
+                                <Button onClick={() => setInstantDay(lastYearDate)}>1 year ago</Button>
                                 </>
                             ) : (
                                 <>
