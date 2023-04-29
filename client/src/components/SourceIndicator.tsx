@@ -4,13 +4,13 @@ import InfoIconTooltip from './InfoIconTooltip';
 
 interface SourceIndicatorProps {
     type: EnergyType,
-    title: string
+    title?: string
 }
 
 const energyInfo : Record<EnergyType, {title: string, desc: string}> = {
     solarpv: {
         title: 'Solar PV',
-        desc: 'Solar Photovoltaics: Solar photovoltaics (PV) convert sunlight directly into electricity through semiconducting materials. This clean and sustainable energy source is increasingly utilized for residential, commercial, and utility-scale applications.'
+        desc: 'Solar photovoltaics (PV) convert sunlight directly into electricity through semiconducting materials. This clean and sustainable energy source is increasingly utilized for residential, commercial, and utility-scale applications.'
     },
     wind: {
         title: 'Wind',

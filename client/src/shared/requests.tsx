@@ -33,14 +33,12 @@ export async function fetchHourlyPvp() {
 
 export async function fetchRecords() {
     const data = await request(endpoint, gql`{
-        renewablesRecord {
-            windTime
-            windValue
-            solarpvTime
-            solarpvValue
-          }
-        }`)
-    return data.renewablesRecord
+        renewablesRecords {
+            solar {time value}
+            wind {time value}
+        }
+    }`)
+    return data.renewablesRecords
 }
 
 export async function fetchInstant() {
@@ -188,7 +186,7 @@ export async function fetchMonthly() {
 
 export async function fetchYearly() {
     const data = await request(endpoint, gql`{
-    latestYearly(count: 15) {
+    latestYearly(count: 35) {
         year,
         solarpv,
         solarthermal,
