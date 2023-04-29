@@ -24,11 +24,13 @@
     "express-graphql": "^0.12.0",
     "graphql": "^16.5.0",
     "node-cron": "^3.0.2",
-    "nodemon": "^2.0.19",
     "parse-jsonp": "^2.0.0",
     "socks-proxy-agent": "^7.0.0",
     "sqlite": "^4.1.1",
     "sqlite3": "^5.0.6",
     "winston": "^3.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
   }
 }
