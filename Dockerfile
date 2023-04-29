@@ -8,7 +8,8 @@ WORKDIR /app
 COPY server ./
 COPY client/dist ./public
 RUN rm -fR node_modules
-RUN npm install
+RUN npm install --production 
+    && npm prune --production
 COPY server/database.db ./
 
 EXPOSE 8080
