@@ -97,20 +97,29 @@ const readingMappings = {
     'PVPC (€/MWh)': 'pvpc',
 }
 
+const installedIngestionMapping = {
+    'Wind': 'Wind',
+    'Hydro': 'Hydro',
+    'Solar photovoltaic': 'Solar',
+    'Pumped storage': 'Pumped',
+    'Thermal solar': 'Thermalsolar',
+    'Coal': 'Carbon',
+    'Nuclear': 'Nuclear',
+}
+
 export async function ingestYearlyInstalled(db) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'year')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const energies = res.data.included.filter(a => a.type === 'Wind' || a.type === 'Solar photovoltaic')
+        const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
         energies.forEach(async energy => {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
                 if (!installed) return
                 const dayDate = value.datetime.substring(0, 4)
-                console.log(energy.type, dayDate, installed)
-                const statement = energy.type === 'Wind' ? ingest.yearlyInstalledWind : ingest.yearlyInstalledSolar
+                const statement = ingest.yearlyInstalled(installedIngestionMapping[energy.type])
                 await db.run(statement, [dayDate, installed])
             })
         })
@@ -125,14 +134,13 @@ export async function ingestMonthlyInstalled(db) {
     const reqUrl = getInstalledUrl(startDate, endDate, 'month')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const energies = res.data.included.filter(a => installedMonthlyStatementMapping[a.type])
+        const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
         energies.forEach(async energy => {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
                 if (!installed) return
                 const dayDate = value.datetime.substring(0, 7)
-                const statement = installedMonthlyStatementMapping[energy.type]
-                console.log(statement)
+                const statement = ingest.monthlyInstalled(installedIngestionMapping[energy.type])
                 await db.run(statement, [dayDate, installed])
             })
         })
@@ -187,7 +195,6 @@ export async function ingestYearlyEmissions(db) {
 
 async function ingestBalanceForCountryAndType(db, startDate, endDate, country, type, dateTruncLength, sqlStatement) {
     const reqUrl = getBalanceUrl(startDate, endDate, type, country)
-    console.log(reqUrl)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = res.data.included.find(a => a.type === 'saldo').attributes.values
@@ -195,7 +202,6 @@ async function ingestBalanceForCountryAndType(db, startDate, endDate, country, t
             const balance = value.value
             if (!balance) return
             const dayDate = value.datetime.substring(0, dateTruncLength)
-            console.log({sqlStatement, dayDate, balance})
             await db.run(sqlStatement, [dayDate, balance])
         })
     } catch (e) {
@@ -205,7 +211,6 @@ async function ingestBalanceForCountryAndType(db, startDate, endDate, country, t
 
 async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLength, sqlStatement) {
     const reqUrl = getEmisionesUrl(startDate, endDate, type)
-    console.log(reqUrl)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const filteredRes = res.data.included.filter(d => d.type === 'tCO2 eq./MWh')
@@ -267,7 +272,6 @@ export async function ingestHourlyPvpc(db) {
 
         for (const hour in values) {
             const readings = values[hour]
-            console.log('executing',ingest.hourlyPvpc, [hour, readings.pvpc])
             const res = await db.run(ingest.hourlyPvpc, [hour, readings.pvpc])
             logger.info(`last id of values inserted ${res.lastID}`)
         }
@@ -350,7 +354,7 @@ open({
         if (argMapToFunctions[args.data]) {
             for (const func of argMapToFunctions[args.data]) {
                 await func(db)
-                console.log('Processed ' + func.name)
+                logger.info('Processed ' + func.name)
             }
         } else {
             logger.info(`${args.data} data type not recognised`)
