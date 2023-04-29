@@ -9,23 +9,23 @@ interface SourceIndicatorProps {
 
 const energyInfo : Record<EnergyType, {title: string, desc: string}> = {
     solarpv: {
-        title: 'Solar photovoltaics',
+        title: 'Solar PV',
         desc: 'Solar Photovoltaics: Solar photovoltaics (PV) convert sunlight directly into electricity through semiconducting materials. This clean and sustainable energy source is increasingly utilized for residential, commercial, and utility-scale applications.'
     },
     wind: {
-        title: 'Wind Energy',
+        title: 'Wind',
         desc: 'Wind energy harnesses the power of moving air by utilizing wind turbines that convert kinetic energy into mechanical energy, which is then transformed into electricity. It\'s an abundant and eco-friendly energy source that contributes significantly to reducing greenhouse gas emissions.'
     },
     hidro: {
-        title: 'Hydroelectric Power',
+        title: 'Hydroelectric',
         desc: 'Hydroelectric power generates electricity by harnessing the energy of flowing water, typically through the construction of dams and turbines. This renewable and reliable energy source is one of the oldest and most widely used forms of green energy production.'
     },
     solarthermal: {
-        title: 'Solar Concentration Systems',
+        title: 'Solar Concentration',
         desc: 'Solar concentration systems use mirrors or lenses to focus sunlight onto a small area, generating intense heat that drives turbines or engines to produce electricity. This renewable technology offers large-scale power generation with minimal environmental impact.'
     },
     carbon: {
-        title: 'Coal Power',
+        title: 'Coal',
         desc: 'Coal is a fossil fuel formed from ancient plant material, which, when burned, releases energy in the form of heat. Its widespread use for electricity generation, however, contributes to significant air pollution and greenhouse gas emissions.'
     },
     gas: {
@@ -37,11 +37,11 @@ const energyInfo : Record<EnergyType, {title: string, desc: string}> = {
         desc: 'Cogeneration, or combined heat and power (CHP), is an energy-efficient process that simultaneously generates electricity and useful thermal energy from a single fuel source, such as natural gas, biomass, or coal. This method reduces energy waste and lowers overall emissions.'
     },
     nuclear: {
-        title: 'Nuclear Power',
+        title: 'Nuclear',
         desc: 'Nuclear power plants generate electricity by using the heat produced from nuclear fission, wherein atomic nuclei are split, releasing a large amount of energy. This energy source provides reliable, low-emission electricity but raises concerns about radioactive waste management and safety.'
     },
     thermal: {
-        title: 'Geothermal Energy',
+        title: 'Geothermal',
         desc: 'Thermal energy is derived from heat stored within the Earth\'s crust and can be harnessed through geothermal power plants. This sustainable and low-emission energy source taps into the planet\'s natural heat for electricity generation and heating applications.'
     }
       };

@@ -8,15 +8,20 @@ import { colours } from '../shared/colours'
 interface InstalledRecord {
     installedWind: number,
     installedSolar: number,
+    installedCarbon: number,
+    installedHydro: number,
+    installedPumped: number,
+    installedThermalSolar: number,
+    installedNuclear: number,
 }
 
-const dataToDataset = (data : InstalledRecord[], type : 'installedWind' | 'installedSolar')  => ({
-        label: 'GW',
+const dataToDataset = (data : InstalledRecord[], type : keyof InstalledRecord)  => ({
+        label: type + '(GW)',
         data: data.map(d => d[type]),
         fill: false,
         tension: 0.3,
         backgroundColor: 'rgb(255, 99, 132)',
-        borderColor: colours[type],
+        borderColor: colours[(type.replace('installed', '')).toLowerCase()],
         borderWidth: 1.5
     })
 
@@ -31,7 +36,12 @@ export const Installed = () => {
         labels: monthlyInstalled.map((d : any) => d.month),
         datasets: [
             dataToDataset(monthlyInstalled, 'installedWind'),
-            dataToDataset(monthlyInstalled, 'installedSolar')
+            dataToDataset(monthlyInstalled, 'installedSolar'),
+            dataToDataset(monthlyInstalled, 'installedNuclear'),
+            dataToDataset(monthlyInstalled, 'installedPumped'),
+            dataToDataset(monthlyInstalled, 'installedCarbon'),
+            dataToDataset(monthlyInstalled, 'installedHydro'),
+            dataToDataset(monthlyInstalled, 'installedThermalSolar'),
         ]
     }
 
@@ -39,7 +49,12 @@ export const Installed = () => {
         labels: yearlyInstalled.map((d : any) => d.year),
         datasets: [
             dataToDataset(yearlyInstalled, 'installedWind'),
-            dataToDataset(yearlyInstalled, 'installedSolar')
+            dataToDataset(yearlyInstalled, 'installedSolar'),
+            dataToDataset(yearlyInstalled, 'installedNuclear'),
+            dataToDataset(yearlyInstalled, 'installedPumped'),
+            dataToDataset(yearlyInstalled, 'installedCarbon'),
+            dataToDataset(yearlyInstalled, 'installedHydro'),
+            dataToDataset(yearlyInstalled, 'installedThermalSolar'),
         ]
     }
 
@@ -48,7 +63,7 @@ export const Installed = () => {
     return <>
         <div className="card mt-2">
             <div className="card-header">
-                How much power is installed for some technologies
+                How much power is installed for certain technologies
             </div>
             <div className="card-body">
                 <div className="row">

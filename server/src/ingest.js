@@ -125,14 +125,14 @@ export async function ingestMonthlyInstalled(db) {
     const reqUrl = getInstalledUrl(startDate, endDate, 'month')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const energies = res.data.included.filter(a => a.type === 'Wind' || a.type === 'Solar photovoltaic')
+        const energies = res.data.included.filter(a => installedMonthlyStatementMapping[a.type])
         energies.forEach(async energy => {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
                 if (!installed) return
                 const dayDate = value.datetime.substring(0, 7)
-                console.log(energy.type, dayDate, installed)
-                const statement = energy.type === 'Wind' ? ingest.monthlyInstalledWind : ingest.monthlyInstalledSolar
+                const statement = installedMonthlyStatementMapping[energy.type]
+                console.log(statement)
                 await db.run(statement, [dayDate, installed])
             })
         })

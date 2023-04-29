@@ -63,9 +63,14 @@ type Month implements Measurement {
     emissions: Float
     balanceFrance: Float,
     balanceMorocco: Float,
-    balancePortugal: Float
+    balancePortugal: Float,
     installedWind: Float
-    installedSolar: Float
+    installedSolar: Float,
+    installedCarbon: Float,
+    installedHydro: Float,
+    installedPumped: Float,
+    installedThermalSolar: Float,
+    installedNuclear: Float,
 }
 
 type Year implements Measurement {
@@ -85,7 +90,12 @@ type Year implements Measurement {
     balanceMorocco: Float,
     balancePortugal: Float
     installedWind: Float
-    installedSolar: Float
+    installedSolar: Float,
+    installedCarbon: Float,
+    installedHydro: Float,
+    installedPumped: Float,
+    installedThermalSolar: Float,
+    installedNuclear: Float,
 }
 
 type RenewablesRecord {

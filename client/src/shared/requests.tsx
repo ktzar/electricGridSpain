@@ -79,6 +79,11 @@ export async function fetchMonthlyInstalled() {
             month,
             installedSolar,
             installedWind,
+            installedCarbon,
+            installedHydro,
+            installedPumped,
+            installedThermalSolar,
+            installedNuclear,
         }}`
     )
     return data.latestMonthly
@@ -90,7 +95,12 @@ export async function fetchYearlyInstalled() {
             year,
             installedSolar,
             installedWind,
-        }}`
+            installedCarbon,
+            installedHydro,
+            installedPumped,
+            installedThermalSolar,
+            installedNuclear,
+        }}`,
     )
     return data.latestYearly
 }

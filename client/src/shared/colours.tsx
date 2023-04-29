@@ -3,12 +3,13 @@ import { EnergyType } from './types'
 export const acceptedColours = ['orange', 'blue' ,'red' ,'purple' ,'pink' ,'lightblue' ,'grey' ,'yellow' ,'teal' ,'brown']
 export type Colour = typeof acceptedColours[number]
 
-export type InstalledTypes = 'installedSolar' | 'installedWind'
 export type Countries = 'Morocco' | 'France' | 'Portugal'
 
-export const colours : Record<EnergyType | InstalledTypes | Countries , Colour> = {
-    installedSolar: 'orange',
-    installedWind: 'blue',
+export const colours : Record<EnergyType | Countries , Colour> = {
+    solar: 'orange',
+    hydro: 'lightblue',
+    pumped: 'darkblue',
+    thermalSolar: 'red',
     solarpv: 'orange',
     wind: 'blue',
     solarthermal: 'red',

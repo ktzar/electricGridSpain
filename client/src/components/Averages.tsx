@@ -15,7 +15,7 @@ const doughOptions = (title = '') => ({
         tooltip: {
             callbacks: {
                 label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
-                    const perc = dataset.data[datasetIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
+                    const perc = dataset.data[dataIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
                     return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW (${perc.toFixed(2)}%)`
                 }
             }
@@ -73,13 +73,12 @@ const dataToDoughnut = (data : ListOfMeasurements) => ({
             labels: data.map(k => k.name),
             data: data.map(k => k.value),
             radius: '100%',
-            cutout: 70,
             backgroundColor: data.map(k => colours[k.name]),
         },
         {
             labels: Object.keys(energyGroups),
-            cutout: 45,
-            radius: '130%',
+            radius: '115%',
+            cutout: 70,
             data: groupByEnergyGroup(data),
             backgroundColor: Object.values(energyGroups).map(v => v.colour)
         }
