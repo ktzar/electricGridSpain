@@ -72,15 +72,14 @@ const dataToDoughnut = (data : ListOfMeasurements) => ({
         {
             labels: data.map(k => k.name),
             data: data.map(k => k.value),
-            radius: '100%',
             backgroundColor: data.map(k => colours[k.name]),
         },
         {
             labels: Object.keys(energyGroups),
-            radius: '115%',
-            cutout: 70,
             data: groupByEnergyGroup(data),
-            backgroundColor: Object.values(energyGroups).map(v => v.colour)
+            backgroundColor: Object.values(energyGroups).map(v => v.colour),
+            cutout: '0%',
+            radius: '150%'
         }
     ]
 })

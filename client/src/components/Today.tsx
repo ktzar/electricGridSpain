@@ -28,7 +28,6 @@ export const getNegativeDataset = (data : MeasurementSet) => {
     return { 
         labels,
         data: values,
-        radius: '150%',
         backgroundColor
     }
 }
@@ -100,21 +99,20 @@ export default () => {
     const doughnutData = {
         labels,
         datasets: [
+            {...getNegativeDataset(latestData)},
             {
                 label: 'GW',
                 labels,
                 data: clearLabels.map(k => latestData[k]),
-                radius: '90%',
                 backgroundColor: clearLabels.map(energy => colours[energy])
             },
             {
                 labels: Object.keys(energyGroups),
                 data: groupByEnergyGroup(latestData),
-                cutout: 0,
-                radius: '130%',
-                backgroundColor: Object.values(energyGroups).map(v => v.colour)
+                backgroundColor: Object.values(energyGroups).map(v => v.colour),
+                cutout: '0%',
+                radius: '200%'
             },
-            getNegativeDataset(latestData)
         ],
     }
 
@@ -124,7 +122,7 @@ export default () => {
             <div className="col">
                 <div className="card">
                   <div className="card-header">
-                     Live Status at {latestData.time}
+                     Live Status <em>{latestData.time.replace(' ', '~')}</em>
                   </div>
                 </div>
             </div>

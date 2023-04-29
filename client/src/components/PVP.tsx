@@ -11,7 +11,7 @@ export const PVP = () => {
     if (!data || isLoading) return <h2>Loading...</h2>
 
     const monthlyData = {
-        labels: data.map((d : any) => dayjs(d.hour + ':00').format('dd HH') + 'h'),
+        labels: data.map((d : any) => dayjs(d.hour + ':00').format('dd-HH') + 'h'),
         datasets: [
             {
                 label: 'PVPC (€)',
@@ -31,7 +31,7 @@ export const PVP = () => {
 
     return <>
         <div className="card">
-            <div className="card-header">Consumer price (€/MWh)</div>
+            <div className="card-header">Consumer price (€/MWh) 72h</div>
             <div className="card-body">
                 <Line options={chartOptions({ title: ``, unit: '€/MWh', max: 0, displayXAxis: true })} data={monthlyData} />
             </div>

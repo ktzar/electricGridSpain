@@ -51,14 +51,12 @@ const root = db => ({
         const row = await db.all(select.yearlyLatest(count))
         return row.reverse()
     },
-    renewablesRecord: async () => {
-        const solarRow = await db.get('select max(solarpv) as solarpv, time from instant')
-        const windRow = await db.get('select max(wind) as wind, time from instant')
+    renewablesRecords: async () => {
+        const solarRows = await db.all('select strftime("%Y-%m", time) as date, time, max(solarpv) as maxSolar from instant group by date order by maxSolar desc limit 5;')
+        const windRows = await db.all('select strftime("%Y-%m", time) as date, time, max(wind) as maxWind from instant group by date order by maxWind desc limit 5;')
         return {
-            windTime: windRow.time,
-            windValue: windRow.wind,
-            solarpvTime: solarRow.time,
-            solarpvValue: solarRow.solarpv
+            wind: windRows.map(row => ({time: row.time, value: row.maxWind})),
+            solar: solarRows.map(row => ({time: row.time, value: row.maxSolar}))
         }
     }
 })
