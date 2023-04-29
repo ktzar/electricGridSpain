@@ -1,0 +1,45 @@
+{"level":"info","message":"undefined data type not recognised"}
+{"level":"info","message":"2022-09-07T13:32:58.929Z","reqUrl":"https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=2022-09-07"}
+{"level":"info","message":"Server started on port 8081"}
+{"level":"error","message":"Error when updating instant data TypeError: Cannot read property 'length' of undefined"}
+{"level":"error","message":"TypeError: Cannot read property 'length' of undefined\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:61:68)\n    at processTicksAndRejections (internal/process/task_queues.js:95:5)"}
+{"level":"info","message":"undefined data type not recognised"}
+{"level":"info","message":"2022-09-07T13:33:50.976Z","reqUrl":"https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=2022-09-07"}
+{"level":"info","message":"Server started on port 8081"}
+{"level":"error","message":"Error when updating instant data TypeError: Cannot read property 'length' of undefined"}
+{"level":"error","message":"TypeError: Cannot read property 'length' of undefined\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:61:68)\n    at processTicksAndRejections (internal/process/task_queues.js:95:5)"}
+{"level":"info","message":"undefined data type not recognised"}
+{"level":"info","message":"2022-09-07T13:34:21.340Z","reqUrl":"https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=2022-09-07"}
+{"level":"info","message":"Server started on port 8081"}
+{"level":"info","message":"2022-09-07T13:34:23.998Z"}
+{"level":"info","message":"Updated 0 rows. Last ID: undefined"}
+{"level":"info","message":"undefined data type not recognised","service":"your-service-name","timestamp":"2022-09-07 15:40:39"}
+{"level":"info","message":"2022-09-07T13:40:39.966Z","reqUrl":"https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=2022-09-07","service":"your-service-name","timestamp":"2022-09-07 15:40:39"}
+{"level":"info","message":"Server started on port 8081","service":"your-service-name","timestamp":"2022-09-07 15:40:39"}
+{"level":"info","message":"2022-09-07T13:40:42.262Z","service":"your-service-name","timestamp":"2022-09-07 15:40:42"}
+{"level":"info","message":"Updated 0 rows. Last ID: undefined","service":"your-service-name","timestamp":"2022-09-07 15:40:42"}
+{"level":"info","message":"undefined data type not recognised","service":"energy-service","timestamp":"2022-09-07 15:47:23"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-07 15:47:23"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:55:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/index.js:53:5","service":"energy-service","timestamp":"2022-09-07 15:47:23"}
+{"level":"info","message":"Server started on port 8081","service":"energy-service","timestamp":"2022-09-07 15:47:23"}
+{"level":"info","message":"undefined data type not recognised","service":"energy-service","timestamp":"2022-09-12 23:31:08"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-12 23:31:08"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:55:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/index.js:53:5","service":"energy-service","timestamp":"2022-09-12 23:31:08"}
+{"level":"info","message":"Server started on port 8081","service":"energy-service","timestamp":"2022-09-12 23:31:08"}
+{"level":"info","message":"undefined data type not recognised","service":"energy-service","timestamp":"2022-09-12 23:31:30"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-12 23:31:30"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:55:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/index.js:53:5","service":"energy-service","timestamp":"2022-09-12 23:31:30"}
+{"level":"info","message":"Server started on port 8081","service":"energy-service","timestamp":"2022-09-12 23:31:30"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-12 23:31:45"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:55:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:204:19","service":"energy-service","timestamp":"2022-09-12 23:31:45"}
+{"level":"info","message":"Instant ingested","service":"energy-service","timestamp":"2022-09-12 23:31:45"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-12 23:33:08"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:55:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:205:19","service":"energy-service","timestamp":"2022-09-12 23:33:08"}
+{"level":"info","message":"Instant ingested","service":"energy-service","timestamp":"2022-09-12 23:33:08"}
+{"level":"error","message":"Error when updating instant data TypeError: 2 arguments required, but only 1 present","service":"energy-service","timestamp":"2022-09-12 23:33:32"}
+{"level":"error","message":"TypeError: 2 arguments required, but only 1 present\n    at requiredArgs (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/_lib/requiredArgs/index.js:10:11)\n    at format (/home/miguel/workspace/electricGridSpain/server/node_modules/date-fns/format/index.js:361:24)\n    at ingestInstant (file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:56:22)\n    at file:///home/miguel/workspace/electricGridSpain/server/src/ingest.js:206:19","service":"energy-service","timestamp":"2022-09-12 23:33:32"}
+{"level":"info","message":"Instant ingested","service":"energy-service","timestamp":"2022-09-12 23:33:32"}
+{"level":"info","message":"Requesting https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=2022-09-12","service":"energy-service","timestamp":"2022-09-12 23:34:02"}
+{"level":"info","message":"Number of values ingested 159","service":"energy-service","timestamp":"2022-09-12 23:34:04"}
+{"level":"info","message":"Updated 0 rows. Last ID: undefined","service":"energy-service","timestamp":"2022-09-12 23:34:05"}
+{"level":"info","message":"Instant ingested","service":"energy-service","timestamp":"2022-09-12 23:34:05"}
