@@ -32,6 +32,9 @@ const root = db => ({
         const row = await db.get(select.instantLatest(1))
         return row;
     },
+    oneYearAgoInstant: async () => {
+        return await db.all(select.instantOneYearAgo())
+    },
     latestInstantByDay: async ({day}) => {
         return await db.all(select.instantLatestByDay(day))
     },

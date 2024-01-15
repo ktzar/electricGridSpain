@@ -82,7 +82,7 @@ export default () => {
         return <div>Error loading data</div>
     }
 
-    const clearLabels : EnergyType[] = Object.keys(latestData).filter(k => latestData[k] > 0 && k !== 'time' && k in colours)
+    const clearLabels : EnergyType[] = Object.keys(latestData).filter(k => latestData[k] >= 0 && k !== 'time' && k in colours)
 
     const seriesData = !isLoading
         ? clearLabels.map(k => ({ name: k, value: latestData[k]}))
@@ -95,14 +95,15 @@ export default () => {
     const clean = latestData.nuclear
     const fossil = latestData.gas + latestData.cogen + latestData.carbon
     const toPerc = (val : number) => Math.round( 100 * val / all).toString() + '%'
+    const negativeDataSet = getNegativeDataset(latestData)
 
     const doughnutData = {
         labels,
         datasets: [
-            {...getNegativeDataset(latestData)},
+            {...negativeDataSet},
             {
                 label: 'GW',
-                labels,
+                labels: clearLabels,
                 data: clearLabels.map(k => latestData[k]),
                 backgroundColor: clearLabels.map(energy => colours[energy])
             },

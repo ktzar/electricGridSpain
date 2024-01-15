@@ -2,11 +2,31 @@
 export const select = {
     instantLatest: count => `select * from instant order by time desc limit 0,${count}`,
     instantLatestByDay: day => `select * from instant where time like '${day}%' order by time desc limit 0,144`,
+    instantOneYearAgo: () => `WITH inst AS (SELECT time AS xtime, solarpv, wind, solarthermal, nuclear, hidro, inter, thermal, cogen, gas, carbon FROM instant)
+    SELECT substr(xtime, 12, 7) AS time,
+        round(avg(solarpv), 2) AS solarpv,
+        round(avg(wind), 2) AS wind,
+        round(avg(solarpv), 2) AS solarpv,
+        round(avg(wind), 2) AS wind,
+        round(avg(solarthermal), 2) AS solarthermal,
+        round(avg(nuclear), 2) AS nuclear,
+        round(avg(hidro), 2) AS hidro,
+        round(avg(inter), 2) AS inter,
+        round(avg(thermal), 2) AS thermal,
+        round(avg(cogen), 2) AS cogen,
+        round(avg(gas), 2) AS gas,
+        round(avg(carbon), 2) AS carbon
+    FROM inst
+    WHERE
+      xtime > date('now','-1 year') AND
+      xtime < date('now', '-1 year', '+30 days')
+    GROUP BY time
+    ORDER BY xtime asc;
+  `,
     dailyLatest: count => `select * from daily order by day desc limit 0,${count}`,
     monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
     yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`,
     hourlyLatest: count => `select * from hourly order by hour desc limit 0,${count}`,
-
 }
 
 const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon'

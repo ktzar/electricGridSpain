@@ -31,6 +31,15 @@ export async function fetchHourlyPvp() {
     return data.latestHourly
 }
 
+export async function fetchOneYearAgoInstant() {
+    const data = await request(endpoint, gql`{
+      oneYearAgoInstant {
+        time, solarpv, wind, solarthermal, nuclear, hidro, inter, thermal, cogen, gas, carbon
+        }
+    }`)
+    return data.oneYearAgoInstant
+}
+
 export async function fetchRecords() {
     const data = await request(endpoint, gql`{
         renewablesRecords {
