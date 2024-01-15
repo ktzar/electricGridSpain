@@ -110,6 +110,7 @@ type Record {
 
  type Query {
      latestInstant: Instant,
+     oneYearAgoInstant: [Instant],
      latestInstantByDay(day: String): [Instant],
      latestHourly(count: Int): [Hour],
      latestDaily(count: Int): [Day],

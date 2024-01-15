@@ -4,11 +4,12 @@ import { Line } from 'react-chartjs-2';
 import { useQuery } from 'react-query'
 import { queryOptions } from '../shared/queryOptions';
 import { sortByField, FieldEntity } from '../shared/fields';
-import { fetchDaily, fetchInstantByDay, fetchMonthly, fetchYearly } from '../shared/requests';
+import { fetchDaily, fetchInstantByDay, fetchMonthly, fetchYearly, fetchOneYearAgoInstant } from '../shared/requests';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { chartOptions } from '../shared/chartOptions';
 import { Button } from './Button';
+import InfoIconTooltip from './InfoIconTooltip';
 
 const dateFormat = 'YYYY-MM-DD'
 
@@ -72,11 +73,13 @@ export default () => {
         return fetch('/api/latest').then(res => res.json()).then(d => d.sort(sortByField('time')))
     }, queryOptions)
 
+    const { isLoading: isLoadingLastYear, data: lastYearWeekData } = useQuery('oneYearAgoInstant', fetchOneYearAgoInstant, queryOptions)
+
     const { isLoading: isLoadingDaily, data: dailyData } = useQuery('daily', fetchDaily, queryOptions)
     const { isLoading: isLoadingMonthly, data: monthlyData } = useQuery('monthly', fetchMonthly, queryOptions)
     const { isLoading: isLoadingYearly, data: yearlyData } = useQuery('yearly', fetchYearly, queryOptions)
 
-    if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly) {
+    if (isLoading || isLoadingMonthly || isLoadingDaily || isLoadingYearly || isLoadingLastYear) {
         return <div className="spinner-border" role="status">
            <span className="sr-only"></span>
        </div>
@@ -99,14 +102,21 @@ export default () => {
             </div>
           <div className="card-body">
             <div className="row">
-                <div className="col-sm-6">
+                <div className="col-sm-4">
                     <h5 className="text-center">Last {Math.round(latestData.length / 6).toString()} hours</h5>
                     <Line options={chartOptions({title: 'Instant production', max: maxValue, min: minValue})} data={{
                         labels: latestData.map((k : FieldEntity) => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))
                     }}/>
                 </div>
-                <div className="col-sm-6 text-center">
+                <div className="col-sm-4">
+                    <h5 className="text-center">Weekly avg last year <span style={{fontWeight: 'normal', textTransform: 'none'}}><InfoIconTooltip text="Average of each instant value for a full week a year ago" /></span></h5>
+                    <Line options={chartOptions({title: 'Instant production', max: maxValue, min: minValue})} data={{
+                        labels: lastYearWeekData.map((k : FieldEntity) => k.time),
+                        datasets: clearLabels.map(labelToDataset(lastYearWeekData))
+                    }}/>
+                </div>
+                <div className="col-sm-4 text-center">
                     {!isLoadingInstantDate &&
                         <>
                             <h5>{instantDay === '' ? 'Production for a given day' : 'Production for ' + dayjs(instantDay).format('DD/MMM/YY')}</h5>
