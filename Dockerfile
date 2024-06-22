@@ -2,7 +2,7 @@ FROM node:17-alpine as builder
 ADD client /app
 WORKDIR /app/
 RUN npm install
-RUN npm run build
+RUN npx vite build
 
 
 

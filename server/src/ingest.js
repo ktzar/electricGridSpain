@@ -68,6 +68,10 @@ export async function ingestInstant(db, overrideDate) {
 
         let updatedRowsCount = 0
         for (let v of data.valoresHorariosGeneracion) {
+            //ignore time saving codes
+            if (v.ts.indexOf('A') + v.ts.indexOf('B') > 0) {
+                continue
+            }
             const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.inter, v.termRenov])
             if (res.lastId>0) {
                 updatedRowsCount++
