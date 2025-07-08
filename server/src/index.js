@@ -2,6 +2,7 @@ import fs from 'fs'
 import { fileURLToPath } from 'url';
 
 import path from 'path'
+import { format, subDays, addDays } from 'date-fns'
 import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -33,7 +34,19 @@ const root = db => ({
         return row;
     },
     oneYearAgoInstant: async () => {
-        return await db.all(select.instantOneYearAgo())
+        return await db.all(select.instantOneMonthFrom('-365 days'))
+    },
+    lastMonthInstant: async () => {
+        return await db.all(select.instantOneMonthFrom('-30 days'))
+    },
+    oneYearAgoWeekAverage: async () => {
+        const oneYearAgo = subDays(new Date(), 365)
+        const oneYearAgoWeek = addDays(oneYearAgo, 7)
+        const oneYearAgoWeekAverage = await db.get(select.oneYearAgoWeekAverage(
+            format(oneYearAgo, 'yyyy-MM-dd'),
+            format(oneYearAgoWeek, 'yyyy-MM-dd')
+        ))
+        return oneYearAgoWeekAverage
     },
     latestInstantByDay: async ({day}) => {
         return await db.all(select.instantLatestByDay(day))

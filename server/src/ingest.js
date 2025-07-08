@@ -143,9 +143,9 @@ export async function ingestMonthlyInstalled(db) {
             energy.attributes.values.forEach(async value => {
                 const installed = value.value
                 if (!installed) return
-                const dayDate = value.datetime.substring(0, 7)
+                const monthDate = value.datetime.substring(0, 7)
                 const statement = ingest.monthlyInstalled(installedIngestionMapping[energy.type])
-                await db.run(statement, [dayDate, installed])
+                await db.run(statement, [monthDate, installed])
             })
         })
     } catch (e) {

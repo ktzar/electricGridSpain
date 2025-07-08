@@ -111,7 +111,9 @@ type Record {
  type Query {
      latestInstant: Instant,
      oneYearAgoInstant: [Instant],
+     lastMonthInstant: [Instant],
      latestInstantByDay(day: String): [Instant],
+     oneYearAgoWeekAverage: [Instant],
      latestHourly(count: Int): [Hour],
      latestDaily(count: Int): [Day],
      latestMonthly(count: Int): [Month],
