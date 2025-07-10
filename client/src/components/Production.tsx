@@ -104,7 +104,7 @@ export default () => {
             <div className="row">
                 <div className="col-sm-4">
                     <h5 className="text-center">Last hours</h5>
-                    <Line options={chartOptions({title: 'Instant production, max: maxValue, min: minValue})} data={{
+                    <Line options={chartOptions({title: 'Instant production', max: maxValue, min: minValue})} data={{
                         labels: latestData.map((k : FieldEntity) => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))
                     }}/>
