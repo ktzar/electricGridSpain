@@ -103,8 +103,8 @@ export default () => {
           <div className="card-body">
             <div className="row">
                 <div className="col-sm-4">
-                    <h5 className="text-center">Last {Math.round(latestData.length / 6).toString()} hours</h5>
-                    <Line options={chartOptions({title: 'Instant production', max: maxValue, min: minValue})} data={{
+                    <h5 className="text-center">Last hours</h5>
+                    <Line options={chartOptions({title: 'Instant production, max: maxValue, min: minValue})} data={{
                         labels: latestData.map((k : FieldEntity) => k.time),
                         datasets: clearLabels.map(labelToDataset(latestData))
                     }}/>

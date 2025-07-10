@@ -133,7 +133,7 @@ export default () => {
           <div className="card-body">
             <div className="row">
                 <div className="col-sm-4">
-                    <h5>Last {latestData.length / 6} hours</h5>
+                    <h5>Last 24 hours</h5>
                     <Doughnut
                         options={doughOptions(`${formatAmount(averageHoursProduction)} GW`)}
                         data={recentHoursData}/>
