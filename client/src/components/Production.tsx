@@ -86,7 +86,7 @@ export default () => {
     }
 
     const instantDateParsed = dayjs(instantDay)
-    const clearLabels = Object.keys(latestData[0]).filter(k => k !== 'time')
+    const clearLabels = latestData.length ? Object.keys(latestData[0]).filter(k => k !== 'time') : [];
     const [minValue, maxValue] = getScaleFromData(latestData, latestDataByDay)
     const yesterdayDate = dayjs().subtract(1, 'day').format(dateFormat)
     const lastWeekDate = dayjs().subtract(7, 'day').format(dateFormat)

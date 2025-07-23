@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { fileURLToPath } from 'url';
 
+import cors from 'cors'
 import path from 'path'
 import { format, subDays, addDays } from 'date-fns'
 import express from 'express'
@@ -16,7 +17,14 @@ import {open} from 'sqlite'
 import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance, ingestHourlyPvpc } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
+const corsOptions = {
+    credentials: true,
+    origin: ['http://energy.antizone.space:3000', 'http://energy.antizone.space:8081'] // Whitelist the domains you want to allow
+};
+
 const app = express()
+app.use(cors(corsOptions));
+
 const { PORT, DB_FILE, PUBLIC_PATH } = process.env
 
 const oneMinute = 1000 * 60
@@ -83,29 +91,29 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-    cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
-    cron.schedule('59 23 * * *', () => {
-        ingestDaily(db)
-        ingestHourlyPvpc(db)
-        //consume instant data from a year ago
-        const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
-        ingestInstant(db, oneYearAgo)
-    })
-    cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
-    cron.schedule('0 4 1 * *', () => {
-        ingestYearly(db)
-        ingestYearlyEmissions(db)
-        ingestYearlyBalance(db)
-        ingestYearlyInstalled(db)
-    })
-    cron.schedule('0 5 */3 * *', () => {
-        ingestDailyEmissions(db)
-        ingestMonthlyEmissions(db)
-        ingestDailyBalance(db)
-        ingestMonthlyBalance(db)
-        ingestMonthlyInstalled(db)
-        ingestYearlyInstalled(db)
-    })
+//    cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
+//    cron.schedule('59 23 * * *', () => {
+//        ingestDaily(db)
+//        ingestHourlyPvpc(db)
+//        //consume instant data from a year ago
+//        const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
+//        ingestInstant(db, oneYearAgo)
+//    })
+//    cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
+//    cron.schedule('0 4 1 * *', () => {
+//        ingestYearly(db)
+//        ingestYearlyEmissions(db)
+//        ingestYearlyBalance(db)
+//        ingestYearlyInstalled(db)
+//    })
+//    cron.schedule('0 5 */3 * *', () => {
+//        ingestDailyEmissions(db)
+//        ingestMonthlyEmissions(db)
+//        ingestDailyBalance(db)
+//        ingestMonthlyBalance(db)
+//        ingestMonthlyInstalled(db)
+//        ingestYearlyInstalled(db)
+//    })
 
     const energyController = createEnergyController(db)
     const graphQlController = graphqlHTTP({
