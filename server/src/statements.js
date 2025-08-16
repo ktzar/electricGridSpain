@@ -1,5 +1,6 @@
 
 const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon, thermal'
+const commonPlaceholders = new Array(commonCols.split(',').length).fill('?').join(',')
 const colToRoundedAvg = col => `round(avg(${col}), 2) AS ${col}`;
 export const select = {
     instantLatest: count => `select * from instant order by time desc limit 0,${count}`,
@@ -32,10 +33,10 @@ export const select = {
 const updateOnConflict = 'update set solarpv=excluded.solarpv, thermal=excluded.thermal, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
 
 export const ingest = {
-        instant: 'insert or replace into instant (time, ' + commonCols + ', inter, thermal) values(?,?,?,?,?,?,?,?,?,?,?);',
-        daily: 'insert into daily (day, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?) on conflict(day) do ' + updateOnConflict + ';',
-        monthly: 'insert or replace into monthly (month, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
-        year: 'insert or replace into yearly (year, ' + commonCols + ') values(?,?,?,?,?,?,?,?,?);',
+        instant: `insert or replace into instant (time, ${commonCols}, inter) values(?,?,${commonPlaceholders});`,
+        daily: `insert into daily (day, ${commonCols}) values(?,${commonPlaceholders}) on conflict(day) do ${updateOnConflict};`,
+        monthly: `insert or replace into monthly (month, ${commonCols}) values(?,${commonPlaceholders});`,
+        year: `insert or replace into yearly (year, ${commonCols}) values(?,${commonPlaceholders});`,
         dailyEmissions: 'insert into daily (day, emissions) values(?,?) on conflict(day) do update set emissions=excluded.emissions;',
         monthlyEmissions: 'insert into monthly (month, emissions) values(?,?) on conflict(month) do update set emissions=excluded.emissions;',
         yearlyEmissions: 'insert into yearly (year, emissions) values(?,?) on conflict(year) do update set emissions=excluded.emissions;',

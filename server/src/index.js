@@ -26,6 +26,7 @@ const app = express()
 app.use(cors(corsOptions));
 
 const { PORT, DB_FILE, PUBLIC_PATH } = process.env
+console.log(`Using database in ${DB_FILE}`);
 
 const oneMinute = 1000 * 60
 const oneHour = oneMinute * 60
@@ -38,8 +39,7 @@ const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, 'schema.graph
 
 const root = db => ({
     latestInstant: async () => {
-        const row = await db.get(select.instantLatest(1))
-        return row;
+        return await db.get(select.instantLatest(1))
     },
     oneYearAgoInstant: async () => {
         return await db.all(select.instantOneMonthFrom('-365 days'))

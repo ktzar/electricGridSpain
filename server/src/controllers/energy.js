@@ -15,7 +15,7 @@ export const createEnergyController = db => {
             res.send(row)
             return
         }
-        const row = await db.all(select.instantLatest24h())
+        const row = await db.all(select.instantLatest(288))
         res.send(row.reverse())
     })
 
