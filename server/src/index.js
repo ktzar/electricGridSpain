@@ -9,7 +9,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import logger from './logger.js'
 import { select } from './statements.js'
-import { graphqlHTTP } from 'express-graphql'
+import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql'
 import cron from 'node-cron'
 import sqlite3 from 'sqlite3'
@@ -91,39 +91,33 @@ open({
         driver: sqlite3.Database
 }).then(adb => {
     const db = adb
-//    cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
-//    cron.schedule('59 23 * * *', () => {
-//        ingestDaily(db)
-//        ingestHourlyPvpc(db)
-//        //consume instant data from a year ago
-//        const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
-//        ingestInstant(db, oneYearAgo)
-//    })
-//    cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
-//    cron.schedule('0 4 1 * *', () => {
-//        ingestYearly(db)
-//        ingestYearlyEmissions(db)
-//        ingestYearlyBalance(db)
-//        ingestYearlyInstalled(db)
-//    })
-//    cron.schedule('0 5 */3 * *', () => {
-//        ingestDailyEmissions(db)
-//        ingestMonthlyEmissions(db)
-//        ingestDailyBalance(db)
-//        ingestMonthlyBalance(db)
-//        ingestMonthlyInstalled(db)
-//        ingestYearlyInstalled(db)
-//    })
-
-    const energyController = createEnergyController(db)
-    const graphQlController = graphqlHTTP({
-        schema,
-        rootValue: root(db),
-        graphiql: true
+    cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
+    cron.schedule('59 23 * * *', () => {
+        ingestDaily(db)
+        ingestHourlyPvpc(db)
+        //consume instant data from a year ago
+        const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
+        ingestInstant(db, oneYearAgo)
+    })
+    cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
+    cron.schedule('0 4 1 * *', () => {
+        ingestYearly(db)
+        ingestYearlyEmissions(db)
+        ingestYearlyBalance(db)
+        ingestYearlyInstalled(db)
+    })
+    cron.schedule('0 5 */3 * *', () => {
+        ingestDailyEmissions(db)
+        ingestMonthlyEmissions(db)
+        ingestDailyBalance(db)
+        ingestMonthlyBalance(db)
+        ingestMonthlyInstalled(db)
+        ingestYearlyInstalled(db)
     })
 
-    app.use('/graphql', graphQlController)
-    app.use('/api/graphql', graphQlController)
+    const energyController = createEnergyController(db)
+    app.all('/graphql', createHandler({ schema, rootValue: root(db) }));
+    app.all('/api/graphql', createHandler({ schema }));
     app.use('/api/', energyController)
     app.get('/ingest', async (req, res) => {
         const yearlyValues = await ingestYearly(db)
