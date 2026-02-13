@@ -1,5 +1,5 @@
 
-const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon, thermal'
+const commonCols = 'solarpv, wind, solarthermal, hidro, nuclear, cogen, gas, carbon'
 const commonPlaceholders = new Array(commonCols.split(',').length).fill('?').join(',')
 const colToRoundedAvg = col => `round(avg(${col}), 2) AS ${col}`;
 export const select = {
@@ -33,7 +33,7 @@ export const select = {
 const updateOnConflict = 'update set solarpv=excluded.solarpv, thermal=excluded.thermal, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'
 
 export const ingest = {
-        instant: `insert or replace into instant (time, ${commonCols}, inter) values(?,?,${commonPlaceholders});`,
+        instant: `insert or replace into instant (time, ${commonCols}, thermal, inter) values(?,${commonPlaceholders},?,?);`,
         daily: `insert into daily (day, ${commonCols}) values(?,${commonPlaceholders}) on conflict(day) do ${updateOnConflict};`,
         monthly: `insert or replace into monthly (month, ${commonCols}) values(?,${commonPlaceholders});`,
         year: `insert or replace into yearly (year, ${commonCols}) values(?,${commonPlaceholders});`,
@@ -47,6 +47,8 @@ export const ingest = {
         yearlyBalance: country => `insert into yearly (year, balance${country}) values(?,?) on conflict(year) do update set balance${country}=excluded.balance${country};`,
         hourlyPvpc: 'insert into hourly (hour, pvpc) values(?,?) on conflict(hour) do update set pvpc=excluded.pvpc;',
 }
+
+console.log(ingest)
 
 /**
 export const weekly = ```
