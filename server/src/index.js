@@ -117,7 +117,7 @@ open({
 
     const energyController = createEnergyController(db)
     app.all('/graphql', createHandler({ schema, rootValue: root(db) }));
-    app.all('/api/graphql', createHandler({ schema }));
+    app.all('/api/graphql', createHandler({ schema, rootValue: root(db) }));
     app.use('/api/', energyController)
     app.get('/ingest', async (req, res) => {
         const yearlyValues = await ingestYearly(db)

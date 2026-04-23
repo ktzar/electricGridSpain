@@ -20,7 +20,7 @@ export const select = {
     monthlyLatest: count => `select * from monthly order by month desc limit 0,${count}`,
     yearlyLatest:  count => `select * from yearly order by year desc limit 0,${count}`,
     hourlyLatest: count => `select * from hourly order by hour desc limit 0,${count}`,
-    instantLatestByDay: (from, to) => `select time(time),
+    instantAverageByRange: (from, to) => `select time(time),
       avg(solarpv) as solarpv,
       avg(wind) as wind,
       avg(hidro) as hidro,
