@@ -118,15 +118,15 @@ export async function ingestYearlyInstalled(db) {
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
-        energies.forEach(async energy => {
-            energy.attributes.values.forEach(async value => {
+        for (const energy of energies) {
+            for (const value of energy.attributes.values) {
                 const installed = value.value
-                if (!installed) return
+                if (!installed) continue
                 const dayDate = value.datetime.substring(0, 4)
                 const statement = ingest.yearlyInstalled(installedIngestionMapping[energy.type])
                 await db.run(statement, [dayDate, installed])
-            })
-        })
+            }
+        }
     } catch (e) {
         console.error(e)
     }
@@ -139,15 +139,15 @@ export async function ingestMonthlyInstalled(db) {
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
-        energies.forEach(async energy => {
-            energy.attributes.values.forEach(async value => {
+        for (const energy of energies) {
+            for (const value of energy.attributes.values) {
                 const installed = value.value
-                if (!installed) return
+                if (!installed) continue
                 const monthDate = value.datetime.substring(0, 7)
                 const statement = ingest.monthlyInstalled(installedIngestionMapping[energy.type])
                 await db.run(statement, [monthDate, installed])
-            })
-        })
+            }
+        }
     } catch (e) {
         console.error(e)
     }
@@ -202,12 +202,12 @@ async function ingestBalanceForCountryAndType(db, startDate, endDate, country, t
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = res.data.included.find(a => a.type === 'saldo').attributes.values
-        values.forEach(async value => {
+        for (const value of values) {
             const balance = value.value
-            if (!balance) return
+            if (!balance) continue
             const dayDate = value.datetime.substring(0, dateTruncLength)
             await db.run(sqlStatement, [dayDate, balance])
-        })
+        }
     } catch (e) {
         console.error(e)
     }
