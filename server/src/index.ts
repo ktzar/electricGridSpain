@@ -14,12 +14,13 @@ import { buildSchema } from 'graphql'
 import cron from 'node-cron'
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
+import type { Database } from 'sqlite'
 import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance, ingestHourlyPvpc } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
 const corsOptions = {
     credentials: true,
-    origin: ['http://energy.antizone.space:3000', 'http://energy.antizone.space:8081'] // Whitelist the domains you want to allow
+    origin: ['http://localhost:3000', 'http://energy.antizone.space:3000', 'http://energy.antizone.space:8081'] // Whitelist the domains you want to allow
 };
 
 const app = express()
@@ -37,7 +38,7 @@ const __dirname = path.dirname(__filename);
 
 const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, 'schema.graphql')).toString())
 
-const root = db => ({
+const root = (db: Database) => ({
     latestInstant: async () => {
         return await db.get(select.instantLatest(1))
     },
@@ -56,7 +57,7 @@ const root = db => ({
         ))
         return oneYearAgoWeekAverage
     },
-    latestInstantByDay: async ({day}) => {
+    latestInstantByDay: async ({day}: {day: string}) => {
         return await db.all(select.instantLatestByDay(day))
     },
     latestDaily: async ({count = 30}) => {
@@ -79,8 +80,8 @@ const root = db => ({
         const solarRows = await db.all('select strftime("%Y-%m", time) as date, time, max(solarpv) as maxSolar from instant group by date order by maxSolar desc limit 5;')
         const windRows = await db.all('select strftime("%Y-%m", time) as date, time, max(wind) as maxWind from instant group by date order by maxWind desc limit 5;')
         return {
-            wind: windRows.map(row => ({time: row.time, value: row.maxWind})),
-            solar: solarRows.map(row => ({time: row.time, value: row.maxSolar}))
+            wind: windRows.map((row: any) => ({time: row.time, value: row.maxWind})),
+            solar: solarRows.map((row: any) => ({time: row.time, value: row.maxSolar}))
         }
     }
 })
@@ -89,8 +90,7 @@ const root = db => ({
 open({
         filename: DB_FILE,
         driver: sqlite3.Database
-}).then(adb => {
-    const db = adb
+}).then((db: Database) => {
     cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
     cron.schedule('59 23 * * *', () => {
         ingestDaily(db)
@@ -126,9 +126,8 @@ open({
         res.send({yearlyValues, monthlyValues, dailyValues})
     })
     app.use('/', energyController)
-    app.use(express.static(PUBLIC_PATH))
+    app.use(express.static(PUBLIC_PATH || ''))
     app.listen(PORT, () => {
         logger.info('Server started on port ' + PORT)
     })
 })
-

@@ -362,6 +362,7 @@ open({
                 logger.info('Processed ' + func.name)
             }
         } else {
+            console.log("Data type not recognised. Supported types are " + Object.keys(argMapToFunctions).join(', '))
             logger.info(`${args.data} data type not recognised`)
         }
     } catch(e: any) {
