@@ -17,6 +17,8 @@ export async function fetchInstantByDay(day: string) {
         cogen,
         gas,
         carbon,
+        bat,
+        consBat,
     }}`)
     return data.latestInstantByDay
 }
@@ -34,7 +36,7 @@ export async function fetchHourlyPvp() {
 export async function fetchOneYearAgoInstant() {
     const data = await request(endpoint, gql`{
       oneYearAgoInstant {
-        time, solarpv, wind, solarthermal, nuclear, hidro, inter, thermal, cogen, gas, carbon
+        time, solarpv, wind, solarthermal, nuclear, hidro, inter, thermal, cogen, gas, carbon, bat, consBat
         }
     }`)
     return data.oneYearAgoInstant
@@ -64,6 +66,8 @@ export async function fetchInstant() {
         cogen,
         gas,
         carbon,
+        bat,
+        consBat,
     }}`)
     return data.latestInstant
 }

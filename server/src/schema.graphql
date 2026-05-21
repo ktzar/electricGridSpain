@@ -9,6 +9,8 @@ interface Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    bat: Float,
+    consBat: Float,
 }
 
 type Instant implements Measurement {
@@ -23,6 +25,8 @@ type Instant implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    bat: Float,
+    consBat: Float,
 }
 
 type Hour {
@@ -46,6 +50,8 @@ type Day implements Measurement {
     balanceFrance: Float,
     balanceMorocco: Float,
     balancePortugal: Float
+    bat: Float,
+    consBat: Float,
 }
 
 type Month implements Measurement {
@@ -60,6 +66,8 @@ type Month implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    bat: Float,
+    consBat: Float,
     emissions: Float
     balanceFrance: Float,
     balanceMorocco: Float,
@@ -85,6 +93,8 @@ type Year implements Measurement {
     cogen: Float,
     gas: Float,
     carbon: Float,
+    bat: Float,
+    consBat: Float,
     emissions: Float,
     installedWind: Float
     installedSolar: Float,

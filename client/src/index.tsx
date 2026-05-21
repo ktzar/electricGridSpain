@@ -10,6 +10,7 @@ import Production from './components/Production';
 import { Emissions } from './components/Emissions';
 import { Balances } from './components/Balances';
 import { Installed } from './components/Installed';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient()
 
@@ -20,25 +21,25 @@ const App = () => {
         <div className="container">
             <h1 className="text-center">🇪🇸 Spanish grid dashboard</h1>
             <h2>Today</h2>
-            <Today />
+            <ErrorBoundary label="Today"><Today /></ErrorBoundary>
             <hr/>
             <h2>Averages</h2>
-            <Averages/>
+            <ErrorBoundary label="Averages"><Averages/></ErrorBoundary>
             <hr/>
             <h2>Production</h2>
-            <Production/>
+            <ErrorBoundary label="Production"><Production/></ErrorBoundary>
             <hr/>
             <h2>Records</h2>
-            <Records />
+            <ErrorBoundary label="Records"><Records /></ErrorBoundary>
             <hr/>
             <h2>Emissions</h2>
-            <Emissions/>
+            <ErrorBoundary label="Emissions"><Emissions/></ErrorBoundary>
             <hr/>
             <h2>Installed</h2>
-            <Installed />
+            <ErrorBoundary label="Installed"><Installed /></ErrorBoundary>
             <hr/>
             <h2>Balances</h2>
-            <Balances />
+            <ErrorBoundary label="Balances"><Balances /></ErrorBoundary>
             <hr/>
             <div className="card">
                 <div className="card-body">

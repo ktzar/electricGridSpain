@@ -67,3 +67,7 @@ Copy `server/.env.example`:
 - `DB_FILE` — path to SQLite file (default `./database.db`; dev uses `../energy.sqlite`)
 - `PORT` — HTTP port (default 8080)
 - `PUBLIC_PATH` — path to serve static files from (set to built client `dist/` in Docker)
+
+## Guidance for context
+
+Don't use `node_modules` as part of the context, as it includes only libraries that are not part of the application's code.

@@ -178,6 +178,15 @@ export default () => {
                         <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)} GW</td></tr>
                     </tbody>
                 </table>
+                <table className="table table-bordered">
+                    <thead style={{background: '#cfc'}}>
+                        <tr><td colSpan={2}>Battery Storage</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><SourceIndicator title="Battery Discharge" type="bat"/></td><td>{formatAmount(latestData.bat)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Battery Charging" type="consBat"/></td><td>{formatAmount(latestData.consBat)} GW</td></tr>
+                    </tbody>
+                </table>
                 <PVP />
             </div>
         </div>

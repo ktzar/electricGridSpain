@@ -1,4 +1,4 @@
-export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'hidro', 'nuclear', 'thermal' , 'cogen' , 'gas' , 'carbon', 'cogen', 'inter']
+export const energyTypes = ['solarpv' , 'wind' , 'solarthermal' , 'hidro', 'nuclear', 'thermal' , 'cogen' , 'gas' , 'carbon', 'inter', 'bat', 'consBat']
 
 export type ListOfMeasurements = {name: EnergyType, value: number}[]
 

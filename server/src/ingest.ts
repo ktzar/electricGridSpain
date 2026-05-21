@@ -4,6 +4,7 @@ import { parseISO, format, subDays, addDays } from 'date-fns'
 import dotenv from 'dotenv'
 dotenv.config()
 import {open} from 'sqlite'
+import type { Database } from 'sqlite'
 import parseJsonp from 'parse-jsonp'
 import axios from 'axios'
 import logger from './logger.js'
@@ -16,10 +17,10 @@ const axiosOptions = {
     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36' }
 };
 
-function valuesToDates(res, dateFormat, extraDays = 0) {
-    const values = {}
+function valuesToDates(res: any, dateFormat: string, extraDays = 0) {
+    const values: Record<string, Record<string, any>> = {}
     for (let v of res.data.included) {
-        const readingType = readingMappings[v.type]
+        const readingType = readingMappings[v.type as string]
         if (!readingType) {
             logger.info('Unknown type ' + v.type)
             continue;
@@ -38,25 +39,25 @@ function valuesToDates(res, dateFormat, extraDays = 0) {
 
 const API_BASE = 'https://apidatos.ree.es/en/datos'
 
-const getPvpcUrl = (startDate, endDate, trunc) =>
+const getPvpcUrl = (startDate: string, endDate: string, trunc: string) =>
     `${API_BASE}/mercados/precios-mercados-tiempo-real?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
-const getGeneracionUrl = (startDate, endDate, trunc) =>
+const getGeneracionUrl = (startDate: string, endDate: string, trunc: string) =>
     `${API_BASE}/generacion/estructura-generacion?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
-const getEmisionesUrl = (startDate, endDate, trunc) =>
+const getEmisionesUrl = (startDate: string, endDate: string, trunc: string) =>
     `${API_BASE}/generacion/no-renovables-detalle-emisiones-CO2?start_date=${startDate}&end_date=${endDate}&time_trunc=${trunc}`
 
-const getDemandaUrl = date =>
+const getDemandaUrl = (date: string) =>
     `https://demanda.ree.es/WSvisionaMovilesPeninsulaRest/resources/demandaGeneracionPeninsula?callback=callback&fecha=${date}`
 
-const getBalanceUrl = (startDate, endDate, type, country) =>
+const getBalanceUrl = (startDate: string, endDate: string, type: string, country: string) =>
     `${API_BASE}/intercambios/${country}-frontera?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
-const getInstalledUrl = (startDate, endDate, type) =>
+const getInstalledUrl = (startDate: string, endDate: string, type: string) =>
     `${API_BASE}/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
-export async function ingestInstant(db, overrideDate) {
+export async function ingestInstant(db: Database, overrideDate?: string) {
     try {
         const date = overrideDate || format(new Date(), 'yyyy-MM-dd')
         const reqUrl = getDemandaUrl(date)
@@ -72,22 +73,22 @@ export async function ingestInstant(db, overrideDate) {
             if (v.ts.indexOf('A') + v.ts.indexOf('B') > 0) {
                 continue
             }
-            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.termRenov, v.inter, ])
-            if (res.lastId>0) {
+            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.termRenov, v.inter, v.bat ?? 0, v.consBat ?? 0])
+            if (res.lastID > 0) {
                 updatedRowsCount++
             }
         }
         logger.info(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
-    } catch (e) {
+    } catch (e: any) {
 
         logger.error(`Error when updating instant data ${e}`)
         logger.error(e.stack)
     }
 }
 
-const readingMappings = {
+const readingMappings: Record<string, string> = {
     Hydro: 'hydro',
-    //'Pumped storage': 
+    //'Pumped storage':
     Nuclear: 'nuclear',
     Coal: 'coal',
     //'Diesel Engines': '
@@ -101,7 +102,7 @@ const readingMappings = {
     'PVPC (€/MWh)': 'pvpc',
 }
 
-const installedIngestionMapping = {
+const installedIngestionMapping: Record<string, string> = {
     'Wind': 'Wind',
     'Hydro': 'Hydro',
     'Solar photovoltaic': 'Solar',
@@ -111,13 +112,13 @@ const installedIngestionMapping = {
     'Nuclear': 'Nuclear',
 }
 
-export async function ingestYearlyInstalled(db) {
+export async function ingestYearlyInstalled(db: Database) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'year')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
+        const energies = res.data.included.filter((e: any) => installedIngestionMapping[e.type])
         for (const energy of energies) {
             for (const value of energy.attributes.values) {
                 const installed = value.value
@@ -132,13 +133,13 @@ export async function ingestYearlyInstalled(db) {
     }
 }
 
-export async function ingestMonthlyInstalled(db) {
+export async function ingestMonthlyInstalled(db: Database) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'month')
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const energies = res.data.included.filter(e => installedIngestionMapping[e.type])
+        const energies = res.data.included.filter((e: any) => installedIngestionMapping[e.type])
         for (const energy of energies) {
             for (const value of energy.attributes.values) {
                 const installed = value.value
@@ -153,7 +154,7 @@ export async function ingestMonthlyInstalled(db) {
     }
 }
 
-export async function ingestDailyBalance(db) {
+export async function ingestDailyBalance(db: Database) {
     const startDate = format(subDays(new Date(), 30), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'day', 10, ingest.dailyBalance('France'))
@@ -161,7 +162,7 @@ export async function ingestDailyBalance(db) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'day', 10, ingest.dailyBalance('Portugal'))
 }
 
-export async function ingestMonthlyBalance(db) {
+export async function ingestMonthlyBalance(db: Database) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'month', 7, ingest.monthlyBalance('France'))
@@ -169,7 +170,7 @@ export async function ingestMonthlyBalance(db) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'month', 7, ingest.monthlyBalance('Portugal'))
 }
 
-export async function ingestYearlyBalance(db) {
+export async function ingestYearlyBalance(db: Database) {
     const startDate = '2017-01-01'//format(subDays(new Date(), 365*11), 'yyyy-01-01')
     const endDate = '2018-12-31'
     //const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
@@ -178,30 +179,30 @@ export async function ingestYearlyBalance(db) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'year', 4, ingest.yearlyBalance('Portugal'))
 }
 
-export async function ingestDailyEmissions(db) {
+export async function ingestDailyEmissions(db: Database) {
     const startDate = format(subDays(new Date(), 90), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'day', 10, ingest.dailyEmissions)
 }
 
-export async function ingestMonthlyEmissions(db) {
+export async function ingestMonthlyEmissions(db: Database) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'month', 7, ingest.monthlyEmissions)
 }
 
-export async function ingestYearlyEmissions(db) {
+export async function ingestYearlyEmissions(db: Database) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
     //const endDate = format(subDays(new Date(), 365*12), 'yyyy-12-31')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'year', 4, ingest.yearlyEmissions)
 }
 
-async function ingestBalanceForCountryAndType(db, startDate, endDate, country, type, dateTruncLength, sqlStatement) {
+async function ingestBalanceForCountryAndType(db: Database, startDate: string, endDate: string, country: string, type: string, dateTruncLength: number, sqlStatement: string) {
     const reqUrl = getBalanceUrl(startDate, endDate, type, country)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const values = res.data.included.find(a => a.type === 'saldo').attributes.values
+        const values = res.data.included.find((a: any) => a.type === 'saldo').attributes.values
         for (const value of values) {
             const balance = value.value
             if (!balance) continue
@@ -213,11 +214,11 @@ async function ingestBalanceForCountryAndType(db, startDate, endDate, country, t
     }
 }
 
-async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLength, sqlStatement) {
+async function ingestEmissionsForType(db: Database, startDate: string, endDate: string, type: string, dateTruncLength: number, sqlStatement: string) {
     const reqUrl = getEmisionesUrl(startDate, endDate, type)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
-        const filteredRes = res.data.included.filter(d => d.type === 'tCO2 eq./MWh')
+        const filteredRes = res.data.included.filter((d: any) => d.type === 'tCO2 eq./MWh')
         if (filteredRes.length > 0) {
             const emissions = filteredRes[0]
             if (type === 'day') {
@@ -233,13 +234,13 @@ async function ingestEmissionsForType(db, startDate, endDate, type, dateTruncLen
                 logger.info(`Updated ${type} emissions for ${dayDate} with value ${emissions}`)
             }
         }
-    } catch(e) {
+    } catch(e: any) {
         logger.error(`Error updating daily emissions ${e}`)
         logger.error(e.stack)
     }
 }
 
-export async function ingestDaily(db) {
+export async function ingestDaily(db: Database) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
@@ -256,14 +257,14 @@ export async function ingestDaily(db) {
             logger.info(`last id of values inserted for day ${date}: ${res.lastID}`)
         }
         return values
-    } catch(e) { 
+    } catch(e: any) {
         logger.error(`Error updating daily data ${e}`)
         logger.error(e.stack)
         return { error: true, message: `${e}` }
     }
 }
 
-export async function ingestHourlyPvpc(db) {
+export async function ingestHourlyPvpc(db: Database) {
     const startDate = format(subDays(new Date(), 7), 'yyyy-MM-dd')
     const endDate = format(addDays(new Date(), 2), 'yyyy-MM-dd')
     const reqUrl = getPvpcUrl(startDate, endDate, 'hour')
@@ -272,7 +273,7 @@ export async function ingestHourlyPvpc(db) {
     try {
         const res = await axios.get(reqUrl, axiosOptions)
         const values = valuesToDates(res, 'yyyy-MM-dd HH')
-        logger.info(`Values received have a length of ${values.length}`)
+        logger.info(`Values received have a length of ${(values as any).length}`)
 
         for (const hour in values) {
             const readings = values[hour]
@@ -280,7 +281,7 @@ export async function ingestHourlyPvpc(db) {
             logger.info(`last id of values inserted ${res.lastID}`)
         }
         return values
-    } catch(e) { 
+    } catch(e: any) {
         const message = `Error updating hourly pvpc data ${e}`
         logger.error(message)
         return { error: true, message }
@@ -288,7 +289,7 @@ export async function ingestHourlyPvpc(db) {
 }
 
 
-export async function ingestMonthly(db) {
+export async function ingestMonthly(db: Database) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
@@ -307,14 +308,14 @@ export async function ingestMonthly(db) {
             logger.info(res.lastID)
         }
         return values
-    } catch(e) { 
+    } catch(e: any) {
         const message =`Error updating monthly data ${e}`
         logger.error(message)
         return { error: true, message }
     }
 }
 
-export async function ingestYearly(db) {
+export async function ingestYearly(db: Database) {
     const startDate = format(subDays(new Date(), 365*4), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
@@ -330,7 +331,7 @@ export async function ingestYearly(db) {
             const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
             logger.info(res.lastID)
         }
-    } catch(e) { 
+    } catch(e: any) {
         const message = `Error updating yearly data ${e}`
         logger.error(message)
         return { error: true, message }
@@ -338,7 +339,7 @@ export async function ingestYearly(db) {
 }
 
 // map of arguments to functions
-const argMapToFunctions = {
+const argMapToFunctions: Record<string, Array<(db: Database, arg?: any) => Promise<any>>> = {
     'all': [ingestInstant, ingestDaily, ingestMonthly, ingestYearly],
     'emissions': [ingestDailyEmissions, ingestMonthlyEmissions, ingestYearlyEmissions],
     'balance': [ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance],
@@ -363,8 +364,8 @@ open({
         } else {
             logger.info(`${args.data} data type not recognised`)
         }
-    } catch(e) {
+    } catch(e: any) {
         logger.info(e.response || e)
     }
-    
+
 })
