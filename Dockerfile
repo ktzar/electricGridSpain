@@ -22,4 +22,4 @@ RUN npm install --production && npm prune --production
 COPY server/database.db ./
 
 EXPOSE 8080
-CMD node ./src/index
+CMD npm run start
