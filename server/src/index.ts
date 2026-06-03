@@ -78,8 +78,12 @@ const root = (db: Database) => ({
     },
     renewablesRecords: async () => {
         const solarRows = await db.all('select strftime("%Y-%m", time) as date, time, max(solarpv) as maxSolar from instant group by date order by maxSolar desc limit 5;')
+        const batRows = await db.all('select strftime("%Y-%m", time) as date, time, max(bat) as maxBat from instant group by date order by maxBat desc limit 5;')
+        const consBatRows = await db.all('select strftime("%Y-%m", time) as date, time, max(-consBat) as maxConsBat from instant group by date order by maxConsBat desc limit 5;')
         const windRows = await db.all('select strftime("%Y-%m", time) as date, time, max(wind) as maxWind from instant group by date order by maxWind desc limit 5;')
         return {
+            bat: batRows.map((row: any) => ({time: row.time, value: row.maxBat})),
+            consBat: consBat.map((row: any) => ({time: row.time, value: row.maxConsBat})),
             wind: windRows.map((row: any) => ({time: row.time, value: row.maxWind})),
             solar: solarRows.map((row: any) => ({time: row.time, value: row.maxSolar}))
         }

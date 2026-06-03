@@ -1,6 +1,6 @@
 export const chartOptions = ({
     title = 'Average Production in period (GW)',
-    unit = 'GWh',
+    unit = 'GW',
     min = 0,
     max = 5000,
     displayXAxis = false
