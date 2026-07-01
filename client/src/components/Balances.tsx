@@ -15,7 +15,7 @@ interface BalanceRecord {
 type BalanceRecordKeys = keyof BalanceRecord
 
 const dataToDataset = (data : BalanceRecord[], country : BalanceRecordKeys)  => ({
-        label: 'GWh',
+        label: 'MWh',
         data: data.map(d => d[country]),
         fill: false,
         tension: 0.3,
@@ -59,7 +59,7 @@ export const Balances = () => {
     return <>
         <div className="card mt-2">
             <div className="card-header">
-                How many GWh have been imported/exported from/to each country
+                How many MWh have been imported/exported from/to each country
             </div>
             <div className="card-body">
                 <div className="row">

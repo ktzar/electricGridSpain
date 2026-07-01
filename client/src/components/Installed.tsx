@@ -16,7 +16,7 @@ interface InstalledRecord {
 }
 
 const dataToDataset = (data : InstalledRecord[], type : keyof InstalledRecord)  => ({
-        label: type + '(GW)',
+        label: type + '(MW)',
         data: data.map(d => d[type]),
         fill: false,
         tension: 0.3,

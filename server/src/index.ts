@@ -83,7 +83,7 @@ const root = (db: Database) => ({
         const windRows = await db.all('select strftime("%Y-%m", time) as date, time, max(wind) as maxWind from instant group by date order by maxWind desc limit 5;')
         return {
             bat: batRows.map((row: any) => ({time: row.time, value: row.maxBat})),
-            consBat: consBat.map((row: any) => ({time: row.time, value: row.maxConsBat})),
+            consBat: consBatRows.map((row: any) => ({time: row.time, value: row.maxConsBat})),
             wind: windRows.map((row: any) => ({time: row.time, value: row.maxWind})),
             solar: solarRows.map((row: any) => ({time: row.time, value: row.maxSolar}))
         }

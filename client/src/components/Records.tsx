@@ -22,7 +22,7 @@ const EnergyRecords = ({type, data} : EnergyRecordsProps) => (
     <div className="col"><div className="card">
         <div className="card-header"><SourceIndicator type={type} /> </div>
         <div className="card-body">
-        <table className="table table-bordered">
+        <table className="table table-bordered table-striped table-sm">
             <thead className="thead-light">
                 <tr> <th><strong>Time</strong></th> <th><strong>Value</strong></th> </tr>
             </thead>
@@ -30,7 +30,7 @@ const EnergyRecords = ({type, data} : EnergyRecordsProps) => (
                 {data.map((row : any) => (
                     <tr key={row.time}>
                         <td>{ dayjs(row.time).format(formatDate)}~<em>{ dayjs(row.time).format(formatTime)}</em></td>
-                        <td>{formatAmount(row.value)} <small>GW</small></td>
+                        <td>{formatAmount(row.value)}</td>
                     </tr>
                 ))}
             </tbody>
@@ -51,6 +51,8 @@ export default () => {
             <p>Maximum instant power generated from a technology. Only the top value per month is shown. </p>
             <EnergyRecords type='solarpv' data={data.solar} />
             <EnergyRecords type='wind' data={data.wind} />
+            <EnergyRecords type='consBat' data={data.consBat} />
+            <EnergyRecords type='bat' data={data.bat} />
         </div>
     )
 }

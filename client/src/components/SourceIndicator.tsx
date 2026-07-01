@@ -12,6 +12,14 @@ const energyInfo : Record<EnergyType, {title: string, desc: string}> = {
         title: 'Solar PV',
         desc: 'Solar photovoltaics (PV) convert sunlight directly into electricity through semiconducting materials. This clean and sustainable energy source is increasingly utilized for residential, commercial, and utility-scale applications.'
     },
+    bat: {
+        title: 'Battery discharge',
+        desc: 'Chemical batteries to provide electricity. Usually LiFePo4, and increasingly Sodium'
+    },
+    consBat: {
+        title: 'Battery charge',
+        desc: 'Chemical batteries to store electricity. Usually LiFePo4, and increasingly Sodium'
+    },
     wind: {
         title: 'Wind',
         desc: 'Wind energy harnesses the power of moving air by utilizing wind turbines that convert kinetic energy into mechanical energy, which is then transformed into electricity. It\'s an abundant and eco-friendly energy source that contributes significantly to reducing greenhouse gas emissions.'

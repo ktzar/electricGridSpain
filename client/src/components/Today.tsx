@@ -61,13 +61,13 @@ const doughnutOptions = (title = '') => ({
             callbacks: {
                 label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
                     const perc = dataset.data[dataIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
-                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW (${perc.toFixed(2)}%)`
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} MW (${perc.toFixed(2)}%)`
                 }
             }
         },
         title: {
             display: true,
-            text: `Instant production ${title}GW`
+            text: `Instant production ${title} MW`
         }
     }
 })
@@ -102,7 +102,7 @@ export default () => {
         datasets: [
             {...negativeDataSet},
             {
-                label: 'GW',
+                label: 'MW',
                 labels: clearLabels,
                 data: clearLabels.map(k => latestData[k]),
                 backgroundColor: clearLabels.map(energy => colours[energy])
@@ -138,53 +138,53 @@ export default () => {
                 </div>
             </div>
             <div className="col">
-                <table className="table table-bordered">
+                <table className="table table-bordered table-sm">
                     <thead style={{background: '#cfc'}}>
                         <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Hydro" type="hidro"/></td><td>{formatAmount(latestData.hidro)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)}</td></tr>
+                        <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)}</td></tr>
+                        <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)}</td></tr>
+                        <tr><td><SourceIndicator title="Hydro" type="hidro"/></td><td>{formatAmount(latestData.hidro)}</td></tr>
                     </tbody>
                 </table>
-                <table className="table table-bordered">
+                <table className="table table-bordered table-sm">
                     <thead style={{background: '#fcc'}}>
                         <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Cogeneration" type="cogen"/></td><td>{formatAmount(latestData.cogen)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)}</td></tr>
+                        <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)}</td></tr>
+                        <tr><td><SourceIndicator title="Cogeneration" type="cogen"/></td><td>{formatAmount(latestData.cogen)}</td></tr>
                     </tbody>
                 </table>
-                <table className="table table-bordered">
+                <table className="table table-bordered table-sm">
                     <thead style={{background: '#aaf', color: 'white'}}>
                         <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
                     </thead>
                     <tbody>
-                            <tr><td><SourceIndicator title="Nuclear" type="nuclear"/></td><td>{formatAmount(latestData.nuclear)} GW</td></tr>
-                            <tr><td><SourceIndicator title="Thermal" type="thermal"/></td><td>{formatAmount(latestData.thermal)} GW</td></tr>
+                            <tr><td><SourceIndicator title="Nuclear" type="nuclear"/></td><td>{formatAmount(latestData.nuclear)}</td></tr>
+                            <tr><td><SourceIndicator title="Thermal" type="thermal"/></td><td>{formatAmount(latestData.thermal)}</td></tr>
                     </tbody>
                 </table>
             </div>
             <div className="col">
-                <table className="table table-bordered">
+                <table className="table table-bordered table-sm">
                     <thead style={{background: '#ccc'}}>
                         <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)}</td></tr>
                     </tbody>
                 </table>
-                <table className="table table-bordered">
+                <table className="table table-bordered table-sm">
                     <thead style={{background: '#cfc'}}>
                         <tr><td colSpan={2}>Battery Storage</td></tr>
                     </thead>
                     <tbody>
-                        <tr><td><SourceIndicator title="Battery Discharge" type="bat"/></td><td>{formatAmount(latestData.bat)} GW</td></tr>
-                        <tr><td><SourceIndicator title="Battery Charging" type="consBat"/></td><td>{formatAmount(latestData.consBat)} GW</td></tr>
+                        <tr><td><SourceIndicator title="Battery Discharge" type="bat"/></td><td>{formatAmount(latestData.bat)}</td></tr>
+                        <tr><td><SourceIndicator title="Battery Charging" type="consBat"/></td><td>{formatAmount(latestData.consBat)}</td></tr>
                     </tbody>
                 </table>
                 <PVP />

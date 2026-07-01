@@ -25,7 +25,7 @@ export async function fetchInstantByDay(day: string) {
 
 export async function fetchHourlyPvp() {
     const data = await request(endpoint, gql`{
-        latestHourly(count: 72) {
+        latestHourly(count: 36) {
             hour,
             pvpc,
         }
@@ -47,6 +47,8 @@ export async function fetchRecords() {
         renewablesRecords {
             solar {time value}
             wind {time value}
+            bat {time value}
+            consBat {time value}
         }
     }`)
     return data.renewablesRecords

@@ -4,7 +4,7 @@ describe('chartOptions', () => {
     it('should return a chartOptions object with default values', () => {
         const options = chartOptions();
         expect(options.plugins.title.text).toStrictEqual(
-            'Average Production in period (GW)'
+            'Average Production in period (MW)'
         );
     });
 

@@ -16,7 +16,7 @@ const doughOptions = (title = '') => ({
             callbacks: {
                 label: function({dataset, datasetIndex, dataIndex, formattedValue} : any) {
                     const perc = dataset.data[dataIndex] / dataset.data.reduce((v : number, a : number) => v + a, 0) * 100
-                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} GW (${perc.toFixed(2)}%)`
+                    return `${capitaliseStr(dataset.labels[dataIndex])}: ${formattedValue} MW (${perc.toFixed(2)}%)`
                 }
             }
         },
@@ -25,7 +25,7 @@ const doughOptions = (title = '') => ({
         },
         title: {
             display: true,
-            text: `Average GW production ${title}`
+            text: `Average MW production ${title}`
         }
     }
 })
@@ -135,19 +135,19 @@ export default () => {
                 <div className="col-sm-4">
                     <h5>Last 24 hours</h5>
                     <Doughnut
-                        options={doughOptions(`${formatAmount(averageHoursProduction)} GW`)}
+                        options={doughOptions(`${formatAmount(averageHoursProduction)} MW`)}
                         data={recentHoursData}/>
                 </div>
                 <div className="col-sm-4">
                     <h5>Last {dailyData.length} days</h5>
                     <Doughnut
-                        options={doughOptions(`${formatAmount(averageDaysProduction)} GW`)}
+                        options={doughOptions(`${formatAmount(averageDaysProduction)} MW`)}
                         data={recentDaysData}/>
                 </div>
                 <div className="col-sm-4">
                     <h5>Last {last12MonthlyData.length} months</h5>
                     <Doughnut
-                        options={doughOptions(`${formatAmount(averageMonthsProduction)} GW`)}
+                        options={doughOptions(`${formatAmount(averageMonthsProduction)} MW`)}
                         data={recentMonthsData}/>
                 </div>
             </div>
