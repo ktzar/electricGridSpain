@@ -14,6 +14,38 @@ interface PvpData {
 export const PVP = () => {
   const { isLoading, data } = useQuery<PvpData[]>('hourlyPvp', fetchHourlyPvp, queryOptions);
 
+  const annotations = useMemo(() => {
+    if (!data) return null;
+
+    const pvpc = data.map((d) => d.pvpc);
+
+    let previousDay = '';
+    const annotations : any = {};
+    const currentHour = dayjs(new Date()).format('YYYY-MM-DD HH');
+    //console.log(currentHour);
+    const labels = data.map((d, index) => {
+      //console.log(d.hour);
+      const currentDay = d.hour.split(' ')[0];
+
+      const format = currentDay !== previousDay ? 'dd-HH' : 'HH';
+      if (currentDay !== previousDay && index !== 0) {
+          annotations[currentDay] = {
+            type: 'line',
+            xMin: index,
+            xMax: index,
+            borderColor: 'rgb(99, 255, 132)',
+            borderWidth: 2,
+          }
+      }
+      previousDay = currentDay;
+      return '';
+    });
+
+    //console.log({annotations})
+
+    return annotations;
+  }, [data]);
+
   const hourlyData = useMemo(() => {
     if (!data) return null;
 
@@ -41,16 +73,17 @@ export const PVP = () => {
       }
     });
 
-    // Generate labels cleanly without external state mutations
+    let previousDay = '';
     const labels = data.map((d, index) => {
       const currentDay = d.hour.split(' ')[0];
-      const previousDay = index > 0 ? data[index - 1].hour.split(' ')[0] : '';
       const timeFormat = d.hour + ':00';
 
-      return currentDay !== previousDay
-        ? dayjs(timeFormat).format('dd-HH') + 'h'
-        : dayjs(timeFormat).format('HH') + 'h';
+      const format = 'dd-HH'//currentDay !== previousDay ? 'dd-HH' : 'HH';
+      previousDay = currentDay;
+        return dayjs(timeFormat).format(format) + 'h';
     });
+
+    //console.log({labels})
 
     return {
       labels,
@@ -68,7 +101,13 @@ export const PVP = () => {
     };
   }, [data]);
 
-  if (isLoading || !data) return <h2>Loading...</h2>;
+  if (isLoading || !data || !hourlyData) return <h2>Loading...</h2>;
+
+  const options = chartOptions({ title: '', unit: '€/MWh', max: 0, displayXAxis: true }); 
+  options.plugins.annotation.annotations = annotations;
+  const chartData = {labels: hourlyData.labels, datasets: hourlyData.datasets};
+  //console.log({options, chartData});
+
 
   return (
     <div className="card">
@@ -76,8 +115,8 @@ export const PVP = () => {
       <div className="card-body">
         {hourlyData && (
           <Bar 
-            options={chartOptions({ title: '', unit: '€/MWh', max: 0, displayXAxis: true })} 
-            data={hourlyData} 
+            options={options} 
+            data={chartData} 
           />
         )}
       </div>

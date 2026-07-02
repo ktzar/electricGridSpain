@@ -100,6 +100,7 @@ const readingMappings: Record<string, string> = {
     'Thermal solar': 'solarthermal',
     Cogeneration: 'cogen',
     'PVPC (€/MWh)': 'pvpc',
+    'PVPC': 'pvpc',
 }
 
 const installedIngestionMapping: Record<string, string> = {
@@ -265,7 +266,7 @@ export async function ingestDaily(db: Database) {
 }
 
 export async function ingestHourlyPvpc(db: Database) {
-    const startDate = format(subDays(new Date(), 7), 'yyyy-MM-dd')
+    const startDate = format(subDays(new Date(), 0), 'yyyy-MM-dd')
     const endDate = format(addDays(new Date(), 2), 'yyyy-MM-dd')
     const reqUrl = getPvpcUrl(startDate, endDate, 'hour')
     logger.info(`Ingesting hourly from ${reqUrl}`)
@@ -277,8 +278,10 @@ export async function ingestHourlyPvpc(db: Database) {
 
         for (const hour in values) {
             const readings = values[hour]
+            console.log(ingest.hourlyPvpc, [hour, readings.pvpc])
             const res = await db.run(ingest.hourlyPvpc, [hour, readings.pvpc])
             logger.info(`last id of values inserted ${res.lastID}`)
+            logger.info(`changes ${res.changes}`)
         }
         return values
     } catch(e: any) {

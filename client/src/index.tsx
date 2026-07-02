@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
+import { Chart } from 'chart.js';
 import 'chart.js/auto';
+import Annotation from 'chartjs-plugin-annotation';
+Chart.register(Annotation);
 
 import Today from './components/Today';
 import Records from './components/Records';

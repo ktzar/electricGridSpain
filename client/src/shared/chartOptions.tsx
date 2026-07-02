@@ -7,6 +7,7 @@ export const chartOptions = ({
 } = {}) => ({
     responsive: true,
     plugins: {
+        annotation: {annotations: {}},
         title: {
             display: true,
             text: title
