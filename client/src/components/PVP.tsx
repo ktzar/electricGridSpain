@@ -22,10 +22,18 @@ export const PVP = () => {
     let previousDay = '';
     const annotations : any = {};
     const currentHour = dayjs(new Date()).format('YYYY-MM-DD HH');
-    //console.log(currentHour);
+
     const labels = data.map((d, index) => {
-      //console.log(d.hour);
       const currentDay = d.hour.split(' ')[0];
+      if (currentHour === d.hour) {
+          annotations[currentHour] = {
+            type: 'line',
+            xMin: index,
+            xMax: index,
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+          }
+      }
 
       const format = currentDay !== previousDay ? 'dd-HH' : 'HH';
       if (currentDay !== previousDay && index !== 0) {
@@ -33,7 +41,7 @@ export const PVP = () => {
             type: 'line',
             xMin: index,
             xMax: index,
-            borderColor: 'rgb(99, 255, 132)',
+            borderColor: 'rgb(99, 99, 99)',
             borderWidth: 2,
           }
       }
@@ -41,7 +49,6 @@ export const PVP = () => {
       return '';
     });
 
-    //console.log({annotations})
 
     return annotations;
   }, [data]);
@@ -83,8 +90,6 @@ export const PVP = () => {
         return dayjs(timeFormat).format(format) + 'h';
     });
 
-    //console.log({labels})
-
     return {
       labels,
       datasets: [
@@ -106,8 +111,6 @@ export const PVP = () => {
   const options = chartOptions({ title: '', unit: '€/MWh', max: 0, displayXAxis: true }); 
   options.plugins.annotation.annotations = annotations;
   const chartData = {labels: hourlyData.labels, datasets: hourlyData.datasets};
-  //console.log({options, chartData});
-
 
   return (
     <div className="card">
