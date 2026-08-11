@@ -134,4 +134,5 @@ type Record {
      latestMonthlyBalance(count: Int): [Month],
      latestYearlyBalance(count: Int): [Year]
      renewablesRecords: RenewablesRecords
+     renewablesRecordsV2: RenewablesRecords
  }

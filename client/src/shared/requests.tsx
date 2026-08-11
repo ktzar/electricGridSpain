@@ -50,8 +50,17 @@ export async function fetchRecords() {
             bat {time value}
             consBat {time value}
         }
+        renewablesRecordsV2 {
+            solar {time value}
+            wind {time value}
+            bat {time value}
+            consBat {time value}
+        }
     }`)
-    return data.renewablesRecords
+    return {
+        maxByMonth: data.renewablesRecords,
+        timeByValue: data.renewablesRecordsV2
+    };
 }
 
 export async function fetchInstant() {
