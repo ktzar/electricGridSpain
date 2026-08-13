@@ -5,7 +5,7 @@ import { createCache } from 'simple-in-memory-cache';
 
 import cors from 'cors'
 import path from 'path'
-import { format, subDays, addDays } from 'date-fns'
+import { format, subDays } from 'date-fns'
 import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -14,7 +14,6 @@ import { select } from './statements.js'
 import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql'
 import cron from 'node-cron'
-import type { Database } from 'sqlite'
 import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance, ingestHourlyPvpc } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
@@ -45,7 +44,7 @@ const __dirname = path.dirname(__filename);
 
 const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, 'schema.graphql')).toString())
 
-const root = (db: Database) => ({
+const root = (db: DatabaseSync) => ({
     latestInstant: () => {
         return db.prepare(select.instantLatest(1)).get()
     },
@@ -56,16 +55,10 @@ const root = (db: Database) => ({
         return db.prepare(select.instantOneMonthFrom('-30 days')).all()
     },
     oneYearAgoWeekAverage: () => {
-        const oneYearAgo = subDays(new Date(), 365)
-        const oneYearAgoWeek = addDays(oneYearAgo, 7)
-        const oneYearAgoWeekAverage = db.prepare(select.oneYearAgoWeekAverage(
-            format(oneYearAgo, 'yyyy-MM-dd'),
-            format(oneYearAgoWeek, 'yyyy-MM-dd')
-        ))
-        return oneYearAgoWeekAverage
+        return db.prepare(select.instantOneMonthFrom('-365 days')).all()
     },
     latestInstantByDay: ({day}: {day: string}) => {
-        return db.prepare(select.instantLatestByDay(day)).prepare().all()
+        return db.prepare(select.instantLatestByDay(day)).all()
     },
     latestDaily: ({count = 30}) => {
         const row = db.prepare(select.dailyLatest(count)).all()

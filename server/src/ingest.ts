@@ -1,10 +1,9 @@
-import sqlite3 from 'sqlite3'
+import { DatabaseSync } from 'node:sqlite'
+import { fileURLToPath } from 'url'
 import argsParser from 'args-parser'
 import { parseISO, format, subDays, addDays } from 'date-fns'
 import dotenv from 'dotenv'
 dotenv.config()
-import {open} from 'sqlite'
-import type { Database } from 'sqlite'
 import parseJsonp from 'parse-jsonp'
 import axios from 'axios'
 import logger from './logger.js'
@@ -57,7 +56,7 @@ const getBalanceUrl = (startDate: string, endDate: string, type: string, country
 const getInstalledUrl = (startDate: string, endDate: string, type: string) =>
     `${API_BASE}/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
-export async function ingestInstant(db: Database, overrideDate?: string) {
+export async function ingestInstant(db: DatabaseSync, overrideDate?: string) {
     try {
         const date = overrideDate || format(new Date(), 'yyyy-MM-dd')
         const reqUrl = getDemandaUrl(date)
@@ -68,17 +67,19 @@ export async function ingestInstant(db: Database, overrideDate?: string) {
         logger.info(`Number of values ingested ${data.valoresHorariosGeneracion.length}`)
 
         let updatedRowsCount = 0
+        let lastInsertRowid = 0
         for (let v of data.valoresHorariosGeneracion) {
             //ignore time saving codes
             if (v.ts.indexOf('A') + v.ts.indexOf('B') > 0) {
                 continue
             }
-            const res = await db.run(ingest.instant, [v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.termRenov, v.inter, v.bat ?? 0, v.consBat ?? 0])
-            if (res.lastID > 0) {
+            const res = db.prepare(ingest.instant).run(v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.termRenov, v.inter, v.bat ?? 0, v.consBat ?? 0)
+            lastInsertRowid = Number(res.lastInsertRowid)
+            if (res.lastInsertRowid > 0) {
                 updatedRowsCount++
             }
         }
-        logger.info(`Updated ${updatedRowsCount} rows. Last ID: ${res.lastID}`)
+        logger.info(`Updated ${updatedRowsCount} rows. Last ID: ${lastInsertRowid}`)
     } catch (e: any) {
 
         logger.error(`Error when updating instant data ${e}`)
@@ -113,7 +114,7 @@ const installedIngestionMapping: Record<string, string> = {
     'Nuclear': 'Nuclear',
 }
 
-export async function ingestYearlyInstalled(db: Database) {
+export async function ingestYearlyInstalled(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'year')
@@ -126,7 +127,7 @@ export async function ingestYearlyInstalled(db: Database) {
                 if (!installed) continue
                 const dayDate = value.datetime.substring(0, 4)
                 const statement = ingest.yearlyInstalled(installedIngestionMapping[energy.type])
-                await db.run(statement, [dayDate, installed])
+                db.prepare(statement).run(dayDate, installed)
             }
         }
     } catch (e) {
@@ -134,7 +135,7 @@ export async function ingestYearlyInstalled(db: Database) {
     }
 }
 
-export async function ingestMonthlyInstalled(db: Database) {
+export async function ingestMonthlyInstalled(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getInstalledUrl(startDate, endDate, 'month')
@@ -147,7 +148,7 @@ export async function ingestMonthlyInstalled(db: Database) {
                 if (!installed) continue
                 const monthDate = value.datetime.substring(0, 7)
                 const statement = ingest.monthlyInstalled(installedIngestionMapping[energy.type])
-                await db.run(statement, [monthDate, installed])
+                db.prepare(statement).run(monthDate, installed)
             }
         }
     } catch (e) {
@@ -155,7 +156,7 @@ export async function ingestMonthlyInstalled(db: Database) {
     }
 }
 
-export async function ingestDailyBalance(db: Database) {
+export async function ingestDailyBalance(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 30), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'day', 10, ingest.dailyBalance('France'))
@@ -163,7 +164,7 @@ export async function ingestDailyBalance(db: Database) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'day', 10, ingest.dailyBalance('Portugal'))
 }
 
-export async function ingestMonthlyBalance(db: Database) {
+export async function ingestMonthlyBalance(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'francia', 'month', 7, ingest.monthlyBalance('France'))
@@ -171,7 +172,7 @@ export async function ingestMonthlyBalance(db: Database) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'month', 7, ingest.monthlyBalance('Portugal'))
 }
 
-export async function ingestYearlyBalance(db: Database) {
+export async function ingestYearlyBalance(db: DatabaseSync) {
     const startDate = '2017-01-01'//format(subDays(new Date(), 365*11), 'yyyy-01-01')
     const endDate = '2018-12-31'
     //const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
@@ -180,26 +181,26 @@ export async function ingestYearlyBalance(db: Database) {
     await ingestBalanceForCountryAndType(db, startDate, endDate, 'portugal', 'year', 4, ingest.yearlyBalance('Portugal'))
 }
 
-export async function ingestDailyEmissions(db: Database) {
+export async function ingestDailyEmissions(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 90), 'yyyy-MM-dd')
     const endDate = format(subDays(new Date(), 1), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'day', 10, ingest.dailyEmissions)
 }
 
-export async function ingestMonthlyEmissions(db: Database) {
+export async function ingestMonthlyEmissions(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'month', 7, ingest.monthlyEmissions)
 }
 
-export async function ingestYearlyEmissions(db: Database) {
+export async function ingestYearlyEmissions(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 365*3), 'yyyy-01-01')
     //const endDate = format(subDays(new Date(), 365*12), 'yyyy-12-31')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     ingestEmissionsForType(db, startDate, endDate, 'year', 4, ingest.yearlyEmissions)
 }
 
-async function ingestBalanceForCountryAndType(db: Database, startDate: string, endDate: string, country: string, type: string, dateTruncLength: number, sqlStatement: string) {
+async function ingestBalanceForCountryAndType(db: DatabaseSync, startDate: string, endDate: string, country: string, type: string, dateTruncLength: number, sqlStatement: string) {
     const reqUrl = getBalanceUrl(startDate, endDate, type, country)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
@@ -208,14 +209,14 @@ async function ingestBalanceForCountryAndType(db: Database, startDate: string, e
             const balance = value.value
             if (!balance) continue
             const dayDate = value.datetime.substring(0, dateTruncLength)
-            await db.run(sqlStatement, [dayDate, balance])
+            db.prepare(sqlStatement).run(dayDate, balance)
         }
     } catch (e) {
         console.error(e)
     }
 }
 
-async function ingestEmissionsForType(db: Database, startDate: string, endDate: string, type: string, dateTruncLength: number, sqlStatement: string) {
+async function ingestEmissionsForType(db: DatabaseSync, startDate: string, endDate: string, type: string, dateTruncLength: number, sqlStatement: string) {
     const reqUrl = getEmisionesUrl(startDate, endDate, type)
     try {
         const res = await axios.get(reqUrl, axiosOptions)
@@ -231,7 +232,7 @@ async function ingestEmissionsForType(db: Database, startDate: string, endDate: 
                 const dayDate = value.datetime.substring(0, dateTruncLength)
                 //convert from tons per MWh to grams per kWh
                 const emissions = parseFloat((value.value * 1000).toFixed(2))
-                const res = await db.run(sqlStatement, [dayDate, emissions])
+                db.prepare(sqlStatement).run(dayDate, emissions)
                 logger.info(`Updated ${type} emissions for ${dayDate} with value ${emissions}`)
             }
         }
@@ -241,7 +242,7 @@ async function ingestEmissionsForType(db: Database, startDate: string, endDate: 
     }
 }
 
-export async function ingestDaily(db: Database) {
+export async function ingestDaily(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 25), 'yyyy-MM-dd')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'day')
@@ -254,8 +255,8 @@ export async function ingestDaily(db: Database) {
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.daily, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            logger.info(`last id of values inserted for day ${date}: ${res.lastID}`)
+            const res = db.prepare(ingest.daily).run(date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal)
+            logger.info(`last id of values inserted for day ${date}: ${res.lastInsertRowid}`)
         }
         return values
     } catch(e: any) {
@@ -265,7 +266,7 @@ export async function ingestDaily(db: Database) {
     }
 }
 
-export async function ingestHourlyPvpc(db: Database) {
+export async function ingestHourlyPvpc(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 0), 'yyyy-MM-dd')
     const endDate = format(addDays(new Date(), 2), 'yyyy-MM-dd')
     const reqUrl = getPvpcUrl(startDate, endDate, 'hour')
@@ -279,8 +280,8 @@ export async function ingestHourlyPvpc(db: Database) {
         for (const hour in values) {
             const readings = values[hour]
             console.log(ingest.hourlyPvpc, [hour, readings.pvpc])
-            const res = await db.run(ingest.hourlyPvpc, [hour, readings.pvpc])
-            logger.info(`last id of values inserted ${res.lastID}`)
+            const res = db.prepare(ingest.hourlyPvpc).run(hour, readings.pvpc)
+            logger.info(`last id of values inserted ${res.lastInsertRowid}`)
             logger.info(`changes ${res.changes}`)
         }
         return values
@@ -292,7 +293,7 @@ export async function ingestHourlyPvpc(db: Database) {
 }
 
 
-export async function ingestMonthly(db: Database) {
+export async function ingestMonthly(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 30*22), 'yyyy-MM-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'month')
@@ -307,8 +308,8 @@ export async function ingestMonthly(db: Database) {
             const readings = values[date]
             const columnValues = [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal]
             logger.info("Running", ingest.monthly, "with", columnValues)
-            const res = await db.run(ingest.monthly, columnValues)
-            logger.info(res.lastID)
+            const res = db.prepare(ingest.monthly).run(...columnValues)
+            logger.info(res.lastInsertRowid)
         }
         return values
     } catch(e: any) {
@@ -318,7 +319,7 @@ export async function ingestMonthly(db: Database) {
     }
 }
 
-export async function ingestYearly(db: Database) {
+export async function ingestYearly(db: DatabaseSync) {
     const startDate = format(subDays(new Date(), 365*4), 'yyyy-01-01')
     const endDate = format(new Date(), 'yyyy-MM-dd')
     const reqUrl = getGeneracionUrl(startDate, endDate, 'year')
@@ -331,8 +332,8 @@ export async function ingestYearly(db: Database) {
 
         for (const date in values) {
             const readings = values[date]
-            const res = await db.run(ingest.year, [date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal])
-            logger.info(res.lastID)
+            const res = db.prepare(ingest.year).run(date, readings.solarpv, readings.wind, readings.solarthermal, readings.hydro, readings.nuclear, readings.cogen, readings.gas, readings.coal)
+            logger.info(res.lastInsertRowid)
         }
     } catch(e: any) {
         const message = `Error updating yearly data ${e}`
@@ -342,7 +343,7 @@ export async function ingestYearly(db: Database) {
 }
 
 // map of arguments to functions
-const argMapToFunctions: Record<string, Array<(db: Database, arg?: any) => Promise<any>>> = {
+const argMapToFunctions: Record<string, Array<(db: DatabaseSync, arg?: any) => Promise<any>>> = {
     'all': [ingestInstant, ingestDaily, ingestMonthly, ingestYearly],
     'emissions': [ingestDailyEmissions, ingestMonthlyEmissions, ingestYearlyEmissions],
     'balance': [ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance],
@@ -354,10 +355,9 @@ const argMapToFunctions: Record<string, Array<(db: Database, arg?: any) => Promi
     'pvpc': [ingestHourlyPvpc],
 }
 
-open({
-    filename: DB_FILE,
-    driver: sqlite3.verbose().Database
-}).then(async db => {
+// only run the CLI ingestion when this file is executed directly, not when imported by the server
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const db = new DatabaseSync(DB_FILE)
     try {
         if (argMapToFunctions[args.data]) {
             for (const func of argMapToFunctions[args.data]) {
@@ -371,5 +371,4 @@ open({
     } catch(e: any) {
         logger.info(e.response || e)
     }
-
-})
+}

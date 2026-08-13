@@ -1,8 +1,8 @@
 import express, { Router, Request, Response } from 'express';
-import type { Database } from 'sqlite'
+import type { DatabaseSync } from 'node:sqlite'
 import { select } from '../statements.js'
 
-export const createEnergyController = (db: Database): Router => {
+export const createEnergyController = (db: DatabaseSync): Router => {
     const energy = express.Router()
 
     energy.get('/instant', (req: Request, res: Response) => {
