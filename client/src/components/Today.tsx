@@ -67,7 +67,7 @@ const doughnutOptions = (title = '') => ({
         },
         title: {
             display: true,
-            text: `Instant production ${title} MW`
+            text: `Instant production ${title}`
         }
     }
 })
