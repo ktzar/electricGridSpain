@@ -19,7 +19,6 @@ type EnergyRecordsProps = {
     dateFirst: boolean
 }
 
-<<<<<<< Updated upstream
 const EnergyRecords = ({type, data, dateFirst} : EnergyRecordsProps) => {
     if (!type || !data) {
         return null;
@@ -52,25 +51,6 @@ const EnergyRecords = ({type, data, dateFirst} : EnergyRecordsProps) => {
         </div></div>
     );
 }
-=======
-const EnergyRecords = ({type, data} : EnergyRecordsProps) => (
-    <div className="col"><div className="card">
-        <div className="card-header"><SourceIndicator type={type} /> </div>
-        <div className="card-body px-0 py-0">
-        <table className="table table-striped table-sm">
-            <tbody>
-                {data.map((row : any) => (
-                    <tr key={row.time}>
-                        <td>{ dayjs(row.time).format(formatDate)}~<em>{ dayjs(row.time).format(formatTime)}</em></td>
-                        <td>{formatAmount(row.value)}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-        </div>
-    </div></div>
-)
->>>>>>> Stashed changes
 
 export default () => {
     const { isLoading, error, data } = useQuery('renewablesRecord', fetchRecords, queryOptions)

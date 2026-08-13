@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder
+FROM node:22-alpine as builder
 ADD client /app
 WORKDIR /app/
 RUN npm install
@@ -6,7 +6,7 @@ RUN npx vite build
 
 
 
-FROM node:17-alpine
+FROM node:22-alpine
 
 ENV DB_FILE=./database.db
 ENV PUBLIC_PATH=public
