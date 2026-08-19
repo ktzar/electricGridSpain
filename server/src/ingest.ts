@@ -64,16 +64,39 @@ export async function ingestInstant(db: DatabaseSync, overrideDate?: string) {
 
         const res = await axios.get(reqUrl, axiosOptions)
         const data = parseJsonp('callback', res.data)
-        logger.info(`Number of values ingested ${data.valoresHorariosGeneracion.length}`)
+        const values = data.valoresHorariosGeneracion
+        if (!Array.isArray(values) || values.length === 0) {
+            logger.warn('Instant API response has no valoresHorariosGeneracion entries, skipping ingestion')
+            return
+        }
+        logger.info(`Number of values ingested ${values.length}`)
+
+        // coerces an API field to a number, defaulting missing/unexpected values to 0,
+        // and logs a warning the first time a field is absent so response shape
+        // changes are visible in the logs instead of silently storing zeros
+        const missingKeys = new Set<string>()
+        const read = (v: Record<string, any>, key: string) => {
+            if (v[key] === undefined && !missingKeys.has(key)) {
+                missingKeys.add(key)
+                logger.warn(`Instant API response missing field '${key}', storing 0`)
+            }
+            const n = Number(v[key])
+            return Number.isNaN(n) ? 0 : n
+        }
 
         let updatedRowsCount = 0
         let lastInsertRowid = 0
-        for (let v of data.valoresHorariosGeneracion) {
+        for (const v of values) {
             //ignore time saving codes
-            if (v.ts.indexOf('A') + v.ts.indexOf('B') > 0) {
+            if (typeof v.ts !== 'string' || v.ts.indexOf('A') + v.ts.indexOf('B') > 0) {
                 continue
             }
-            const res = db.prepare(ingest.instant).run(v.ts, v.solFot, v.eol, v.solTer, v.hid, v.nuc, v.cogenResto, v.cc, v.car, v.termRenov, v.inter, v.bat ?? 0, v.consBat ?? 0)
+            const res = db.prepare(ingest.instant).run(
+                v.ts,
+                read(v, 'solFot'), read(v, 'eol'), read(v, 'solTer'), read(v, 'hid'),
+                read(v, 'nuc'), read(v, 'cogenResto'), read(v, 'cc'), read(v, 'car'),
+                read(v, 'bio'), read(v, 'inter'), read(v, 'bat'), read(v, 'consBat'),
+            )
             lastInsertRowid = Number(res.lastInsertRowid)
             if (res.lastInsertRowid > 0) {
                 updatedRowsCount++
