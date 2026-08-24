@@ -4,7 +4,7 @@ const commonPlaceholders = new Array(commonCols.split(',').length).fill('?').joi
 const colToRoundedAvg = (col: string) => `round(avg(${col}), 2) AS ${col}`;
 export const select = {
     instantLatest: (count: number) => `select * from instant order by time desc limit 0,${count}`,
-    instantLatestByDay: (day: string) => `select * from instant where time like '${day}%' order by time desc limit 0,144`,
+    instantLatestByDay: (day: string) => `select * from instant where time like '${day}%' order by time desc limit 0,288`,
     instantLatest24h: (day: string) => `select * from instant where time > date('now', '-1 day') || ' ' || time('now', '-1 day') order by time desc`,
     instantOneMonthFrom: (when = '-1 year') => `WITH inst AS (SELECT time AS xtime, ${commonCols}, inter FROM instant)
     SELECT substr(xtime, 12, 7) AS time,
