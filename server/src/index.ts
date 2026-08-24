@@ -8,22 +8,35 @@ import path from 'path'
 import { format, subDays } from 'date-fns'
 import express from 'express'
 import dotenv from 'dotenv'
-dotenv.config()
 import logger from './logger.js'
 import { select } from './statements.js'
 import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql'
 import cron from 'node-cron'
-import { ingestMonthly, ingestDaily, ingestYearly, ingestInstant, ingestYearlyEmissions, ingestYearlyInstalled, ingestMonthlyEmissions, ingestMonthlyInstalled, ingestDailyEmissions, ingestDailyBalance, ingestMonthlyBalance, ingestYearlyBalance, ingestHourlyPvpc } from './ingest.js'
+import { ingestMonthly,
+	ingestDaily,
+	ingestYearly,
+	ingestInstant,
+	ingestYearlyEmissions,
+	ingestYearlyInstalled,
+	ingestMonthlyEmissions,
+	ingestMonthlyInstalled,
+	ingestDailyEmissions,
+	ingestDailyBalance,
+	ingestMonthlyBalance,
+	ingestYearlyBalance,
+	ingestHourlyPvpc
+} from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
+dotenv.config()
 const { get, set } = createCache();
 
 const recordQuery = (from : number, to : number , step : number, column : string) => `with RECURSIVE generate_series(value) as ( select ${from} union all select value - ${step} from generate_series where value > ${to}) select s.value as value, (select time from instant where ${column} >= s.value limit 1) as time from generate_series as s where time is not null limit 10;`  ;
 
 const corsOptions = {
     credentials: true,
-    origin: ['http://localhost:3000', 'http://energy.antizone.space:3000', 'http://energy.antizone.space:8081'] // Whitelist the domains you want to allow
+    origin: ['http://localhost:3000', 'http://energy.ktzar.uk', 'http://energy.ktzar.uk'] // Whitelist the domains you want to allow
 };
 
 const app = express()
@@ -116,22 +129,30 @@ const root = (db: DatabaseSync) => ({
 })
 
 
-cron.schedule('0,15,30,45 * * * *', () => ingestInstant(db))
-cron.schedule('59 23 * * *', () => {
+const CRONS = {
+	INSTANT: '0,15,30,45 * * * *',
+	PVPC: '0 */4 * * *',
+	DAILY: '59 23 * * *',
+	MONTHLY: '0 3 */3 * *',
+	YEARLY: '0 4 */6 * *',
+	OTHER: '0 5 */3 * *',
+};
+
+cron.schedule(CRONS.INSTANT, () => ingestInstant(db))
+cron.schedule(CRONS.PVPC, () => ingestHourlyPvpc(db))
+cron.schedule(CRONS.DAILY, () => {
     ingestDaily(db)
-    ingestHourlyPvpc(db)
-    //consume instant data from a year ago
     const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd')
     ingestInstant(db, oneYearAgo)
 })
-cron.schedule('0 3 */3 * *', () => ingestMonthly(db))
-cron.schedule('0 4 1 * *', () => {
+cron.schedule(CRONS.MONTHLY, () => ingestMonthly(db))
+cron.schedule(CRONS.YEARLY, () => {
     ingestYearly(db)
     ingestYearlyEmissions(db)
     ingestYearlyBalance(db)
     ingestYearlyInstalled(db)
 })
-cron.schedule('0 5 */3 * *', () => {
+cron.schedule(CRONS.OTHER, () => {
     ingestDailyEmissions(db)
     ingestMonthlyEmissions(db)
     ingestDailyBalance(db)
