@@ -54,7 +54,7 @@ const getBalanceUrl = (startDate: string, endDate: string, type: string, country
     `${API_BASE}/intercambios/${country}-frontera?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
 const getInstalledUrl = (startDate: string, endDate: string, type: string) =>
-    `${API_BASE}/generacion/potencia-instalada?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
+    `${API_BASE}/generacion/potencia-instalada-generacion?start_date=${startDate}&end_date=${endDate}&time_trunc=${type}`
 
 export async function ingestInstant(db: DatabaseSync, overrideDate?: string) {
     try {
