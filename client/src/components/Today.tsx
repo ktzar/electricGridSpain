@@ -7,6 +7,8 @@ import { fetchInstant } from '../shared/requests';
 import formatAmount from '../shared/formatAmount';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 import { PVP } from './PVP';
+import { Battery } from './Battery';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const sumObjectValues = (data : Record<string, number>) => {
     let all = 0
@@ -188,6 +190,7 @@ export default () => {
                     </tbody>
                 </table>
                 <PVP />
+                <ErrorBoundary label="Battery"><Battery /></ErrorBoundary>
             </div>
         </div>
         </>
