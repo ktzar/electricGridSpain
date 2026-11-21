@@ -55,15 +55,10 @@ export const Battery = () => {
   if (isLoading) return <h2>Loading...</h2>;
   if (!chartData) return <div>Error loading data</div>;
 
-  const options = chartOptions({ title: '', unit: 'MW', min: 0, max: 0, displayXAxis: true });
+  const options = chartOptions({ hideTitle: true, unit: 'MW', min: 0, max: 0, displayXAxis: true });
   options.plugins.legend.display = true;
 
   return (
-    <div className="card mt-2">
-      <div className="card-header">Battery charge / discharge (MW) today</div>
-      <div className="card-body">
-        <Line options={options} data={chartData} />
-      </div>
-    </div>
+    <Line options={options} data={chartData} />
   );
 };

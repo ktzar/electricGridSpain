@@ -3,12 +3,13 @@ export const chartOptions = ({
     unit = 'MW',
     min = 0,
     max = 5000,
-    displayXAxis = false
+    displayXAxis = false,
+    hideTitle
 } = {}) => ({
     responsive: true,
     plugins: {
         annotation: {annotations: {}},
-        title: {
+        title: hideTitle ? null : {
             display: true,
             text: title
         },

@@ -8,6 +8,7 @@ import formatAmount from '../shared/formatAmount';
 import { ListOfMeasurements, EnergyType, MeasurementSet } from '../shared/types';
 import { PVP } from './PVP';
 import { Battery } from './Battery';
+import { BatteryDaily } from './BatteryDaily';
 import { ErrorBoundary } from './ErrorBoundary';
 
 const sumObjectValues = (data : Record<string, number>) => {
@@ -74,6 +75,33 @@ const doughnutOptions = (title = '') => ({
     }
 })
 
+const Card = ({title, colour, margin = '', children}) => {
+    return (
+        <div className={'card ' + margin}>
+          <div className="card-header">{title}</div>
+          <div className="card-body">
+               <ErrorBoundary label={title}>{children}</ErrorBoundary>
+          </div>
+        </div>
+    );
+};
+
+const Table = ({title, colour, children}) => {
+    return (
+        <table className="table table-bordered table-sm">
+            <thead style={{background: colour}}>
+                <tr><td colSpan={2}>{title}</td></tr>
+            </thead>
+            <tbody>
+                {children}
+            </tbody>
+        </table>
+)};
+
+const Row = ({type, value}) => {
+    return <tr><td><SourceIndicator type={type}/></td><td>{formatAmount(value)}</td></tr>
+}
+
 export default () => {
     const { isLoading, error, data: latestData } = useQuery('instantData', fetchInstant, queryOptions)
 
@@ -138,59 +166,47 @@ export default () => {
                         <Doughnut options={doughnutOptions(formatAmount(parseFloat((all / 1000).toFixed(2))))} data={doughnutData} />
                   </div>
                 </div>
-            </div>
-            <div className="col">
-                <table className="table table-bordered table-sm">
-                    <thead style={{background: '#cfc'}}>
-                        <tr><td colSpan={2}>{toPerc(renewables)} Renewables</td></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><SourceIndicator title="Solar" type="solarpv"/></td><td>{formatAmount(latestData.solarpv)}</td></tr>
-                        <tr><td><SourceIndicator title="Solar Thermal" type="solarthermal"/></td><td>{formatAmount(latestData.solarthermal)}</td></tr>
-                        <tr><td><SourceIndicator title="Wind" type="wind"/></td><td>{formatAmount(latestData.wind)}</td></tr>
-                        <tr><td><SourceIndicator title="Hydro" type="hidro"/></td><td>{formatAmount(latestData.hidro)}</td></tr>
-                    </tbody>
-                </table>
-                <table className="table table-bordered table-sm">
-                    <thead style={{background: '#fcc'}}>
-                        <tr><td colSpan={2}>{toPerc(fossil)} Fossil Fuels</td></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><SourceIndicator title="Carbon" type="carbon"/></td><td>{formatAmount(latestData.carbon)}</td></tr>
-                        <tr><td><SourceIndicator title="Gas" type="gas"/></td><td>{formatAmount(latestData.gas)}</td></tr>
-                        <tr><td><SourceIndicator title="Cogeneration" type="cogen"/></td><td>{formatAmount(latestData.cogen)}</td></tr>
-                    </tbody>
-                </table>
-                <table className="table table-bordered table-sm">
-                    <thead style={{background: '#aaf', color: 'white'}}>
-                        <tr><td colSpan={2}>{toPerc(clean)} Other sources</td></tr>
-                    </thead>
-                    <tbody>
-                            <tr><td><SourceIndicator title="Nuclear" type="nuclear"/></td><td>{formatAmount(latestData.nuclear)}</td></tr>
-                            <tr><td><SourceIndicator title="Thermal" type="thermal"/></td><td>{formatAmount(latestData.thermal)}</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div className="col">
-                <table className="table table-bordered table-sm">
-                    <thead style={{background: '#ccc'}}>
-                        <tr><td colSpan={2}>{toPerc(Math.abs(latestData.inter))} Interconnectors</td></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><SourceIndicator title="Interchanges" type="inter"/></td><td>{formatAmount(latestData.inter)}</td></tr>
-                    </tbody>
-                </table>
-                <table className="table table-bordered table-sm">
-                    <thead style={{background: '#cfc'}}>
-                        <tr><td colSpan={2}>Battery Storage</td></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><SourceIndicator title="Battery Discharge" type="bat"/></td><td>{formatAmount(latestData.bat)}</td></tr>
-                        <tr><td><SourceIndicator title="Battery Charging" type="consBat"/></td><td>{formatAmount(latestData.consBat)}</td></tr>
-                    </tbody>
-                </table>
                 <PVP />
-                <ErrorBoundary label="Battery"><Battery /></ErrorBoundary>
+            </div>
+            <div className="col">
+                <Table colour='#cfc' title={toPerc(renewables) + ' Renewables'}>
+                    <>
+                        <Row type="solarpv" value={latestData.solarpv}/>
+                        <Row type="solarthermal" value={latestData.solarthermal}/>
+                        <Row type="wind" value={latestData.wind}/>
+                        <Row type="hidro" value={latestData.hidro}/>
+                    </>
+                </Table>
+                <Table colour='#fcc' title={toPerc(fossil) + ' Fossil Fuel'}>
+                    <>
+                        <Row type="carbon" value={latestData.carbon}/>
+                        <Row type="gas" value={latestData.gas}/>
+                        <Row type="cogen" value={latestData.cogen}/>
+                    </>
+                </Table>
+                <Table colour='#aaf' title={toPerc(clean) + ' Other Sources'}>
+                    <>
+                        <Row type="nuclear" value={latestData.nuclear}/>
+                        <Row type="thermal" value={latestData.thermal}/>
+                    </>
+                </Table>
+                <Table colour='#ccc' title={toPerc(Math.abs(latestData.inter)) + ' Interconnector'}>
+                    <Row type="inter" value={latestData.inter}/>
+                </Table>
+                <Table colour='#cfc' title={'Battery storage'}>
+                    <>
+                        <Row type="bat" value={latestData.bat}/>
+                        <Row type="consBat" value={latestData.consBat}/>
+                    </>
+                </Table>
+            </div>
+            <div className="col">
+                <Card title="Battery charge / discharge (MW) today">
+                    <Battery />
+                </Card>
+                <Card title="Battery charge / discharge (MWh) by day" margin='mt-2'>
+                    <BatteryDaily />
+                </Card>
             </div>
         </div>
         </>

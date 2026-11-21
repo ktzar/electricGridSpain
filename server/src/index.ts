@@ -25,14 +25,12 @@ import { ingestMonthly,
 	ingestDailyBalance,
 	ingestMonthlyBalance,
 	ingestYearlyBalance,
-	ingestHourlyPvpc
+	ingestHourlyPvpc,
 } from './ingest.js'
 import { createEnergyController } from './controllers/energy.js'
 
 dotenv.config()
 const { get, set } = createCache();
-
-const recordQuery = (from : number, to : number , step : number, column : string) => `with RECURSIVE generate_series(value) as ( select ${from} union all select value - ${step} from generate_series where value > ${to}) select s.value as value, (select time from instant where ${column} >= s.value limit 1) as time from generate_series as s where time is not null limit 10;`  ;
 
 const corsOptions = {
     credentials: true,
@@ -89,6 +87,10 @@ const root = (db: DatabaseSync) => ({
         const row = db.prepare(select.yearlyLatest(count)).all()
         return row.reverse()
     },
+    dailyBattery: ({count = 10}) => {
+        const row = db.prepare(select.dailyBattery(count)).all()
+        return row;
+    },
     renewablesRecords: () => {
         let ret = get('renewablesRecords');
         if (ret === undefined) {
@@ -110,10 +112,10 @@ const root = (db: DatabaseSync) => ({
         let ret = get('renewablesRecordsV2');
         if (ret === undefined) {
             const queries = {
-                solar: recordQuery(40000, 10000, 1000, 'solarpv'),
-                wind: recordQuery(25000, 10000, 1000, 'wind'),
-                bat: recordQuery(500, 30, 10, 'bat'),
-                consbat: recordQuery(500, 30, 10, '-consbat')
+                solar: select.records(40000, 10000, 1000, 'solarpv'),
+                wind: select.records(25000, 10000, 1000, 'wind'),
+                bat: select.records(500, 30, 10, 'bat'),
+                consbat: select.records(500, 30, 10, '-consbat')
             };
             console.log(queries);
             ret = {

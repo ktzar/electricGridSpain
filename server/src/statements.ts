@@ -16,6 +16,7 @@ export const select = {
     GROUP BY time
     ORDER BY xtime asc;
   `,
+    dailyBattery: (count: number) => `select sum(bat) as bat, sum(consBat) as consBat, substr(time, 0, 11) as date from instant where bat is not null group by date order by date desc limit ${count};`,
     dailyLatest: (count: number) => `select * from daily order by day desc limit 0,${count}`,
     monthlyLatest: (count: number) => `select * from monthly order by month desc limit 0,${count}`,
     yearlyLatest:  (count: number) => `select * from yearly order by year desc limit 0,${count}`,
@@ -28,6 +29,8 @@ export const select = {
       avg(nuclear) as nuclear,
       avg(gas) as gas
     from instant where time > '${from}' and time < '${to}' group by time(time)`,
+
+    records: (from : number, to : number , step : number, column : string) => `with RECURSIVE generate_series(value) as ( select ${from} union all select value - ${step} from generate_series where value > ${to} ) select s.value as value, (select time from instant where ${column} >= s.value limit 1) as time from generate_series as s where time is not null limit 10;`,
 }
 
 const updateOnConflict = 'update set solarpv=excluded.solarpv, thermal=excluded.thermal, wind=excluded.wind, solarthermal=excluded.solarthermal, nuclear=excluded.nuclear, hidro=excluded.hidro, cogen=excluded.cogen, gas=excluded.gas, carbon=excluded.carbon'

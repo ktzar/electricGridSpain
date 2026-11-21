@@ -3,6 +3,17 @@ import { sortByField } from './fields';
 
 const endpoint = "/api/graphql";
 
+export async function fetchBatteryByDay(count: number) {
+    const data = await request(endpoint, gql`{
+        dailyBattery(count: ${count}) {
+        date
+        bat,
+        consBat,
+    }}`)
+    console.log(data)
+    return data.dailyBattery
+}
+
 export async function fetchInstantByDay(day: string) {
     const data = await request(endpoint, gql`{
         latestInstantByDay(day: "${day}") {

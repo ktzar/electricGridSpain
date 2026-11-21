@@ -113,7 +113,7 @@ export const PVP = () => {
   const chartData = {labels: hourlyData.labels, datasets: hourlyData.datasets};
 
   return (
-    <div className="card">
+    <div className="card mt-2">
       <div className="card-header">Consumer price (€/MWh) 72h</div>
       <div className="card-body">
         {hourlyData && (

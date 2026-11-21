@@ -120,6 +120,12 @@ type Record {
     value: Float
 }
 
+type DayBattery {
+  date: String!
+  bat: Float
+  consBat: Float
+}
+
  type Query {
      latestInstant: Instant,
      oneYearAgoInstant: [Instant],
@@ -135,4 +141,6 @@ type Record {
      latestYearlyBalance(count: Int): [Year]
      renewablesRecords: RenewablesRecords
      renewablesRecordsV2: RenewablesRecords
+     dailyBattery(count: Int): [DayBattery]
+
  }

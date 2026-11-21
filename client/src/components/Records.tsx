@@ -65,19 +65,19 @@ export default () => {
             <h3>Time of top records</h3>
             <div className="row">
                 <p>Maximum instant power generated from a technology. Only the top value per month is shown. </p>
-                <EnergyRecords dateFirst type='solarpv' data={data.maxByMonth.solar} />
-                <EnergyRecords dateFirst type='wind' data={data.maxByMonth.wind} />
-                <EnergyRecords dateFirst type='consBat' data={data.maxByMonth.consBat} />
-                <EnergyRecords dateFirst type='bat' data={data.maxByMonth.bat} />
+                <EnergyRecords dateFirst key='solarpv' type='solarpv' data={data.maxByMonth.solar} />
+                <EnergyRecords dateFirst key='wind' type='wind' data={data.maxByMonth.wind} />
+                <EnergyRecords dateFirst key='consBat' type='consBat' data={data.maxByMonth.consBat} />
+                <EnergyRecords dateFirst key='bat' type='bat' data={data.maxByMonth.bat} />
             </div>
             <hr/>
             <h3>Time when record was broken</h3>
             <div className="row">
                 <p>Time when a specific record was broken</p>
-                <EnergyRecords type='solarpv' data={data.timeByValue.solar} />
-                <EnergyRecords type='wind' data={data.timeByValue.wind} />
-                <EnergyRecords type='consBat' data={data.timeByValue.consBat} />
-                <EnergyRecords type='bat' data={data.timeByValue.bat} />
+                <EnergyRecords key='solarpv' type='solarpv' data={data.timeByValue.solar} />
+                <EnergyRecords key='wind' type='wind' data={data.timeByValue.wind} />
+                <EnergyRecords key='consBat' type='consBat' data={data.timeByValue.consBat} />
+                <EnergyRecords key='bat' type='bat' data={data.timeByValue.bat} />
             </div>
         </>
     )
