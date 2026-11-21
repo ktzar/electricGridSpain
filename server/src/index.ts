@@ -112,8 +112,8 @@ const root = (db: DatabaseSync) => ({
             const queries = {
                 solar: recordQuery(40000, 10000, 1000, 'solarpv'),
                 wind: recordQuery(25000, 10000, 1000, 'wind'),
-                bat: recordQuery(70, 1, 1, 'bat'),
-                consbat: recordQuery(70, 1, 1, '-consbat')
+                bat: recordQuery(500, 30, 10, 'bat'),
+                consbat: recordQuery(500, 30, 10, '-consbat')
             };
             console.log(queries);
             ret = {
